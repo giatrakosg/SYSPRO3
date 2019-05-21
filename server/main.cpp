@@ -1,16 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <signal.h>
 #include <getopt.h>
-#include <dirent.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <wait.h>
-#include <unistd.h>
-#include <sys/file.h>
 #include <iostream>
-// We parse the port argument 
+// We parse the port argument
 void getArgs(int argc,char **argv,int *port, char *& port_s) {
     /* Parse cmd line parameters using getopts
      * Modified example found at :
