@@ -27,12 +27,15 @@ void Server::run_server(void) {
     /* Create socket */
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
         perror_exit("socket");
+
     server.sin_family = AF_INET;       /* Internet domain */
     server.sin_addr.s_addr = htonl(INADDR_ANY);
     server.sin_port = htons(port);      /* The given port */
+
     /* Bind socket to address */
     if (bind(sock, serverptr, sizeof(server)) < 0)
         perror_exit("bind");
+
     /* Listen for connections */
     if (listen(sock, 5) < 0) perror_exit("listen");
     printf("Listening for connections to port %d\n", port);
@@ -40,16 +43,24 @@ void Server::run_server(void) {
         /* accept connection */
     	if ((newsock = accept(sock, clientptr, &clientlen)) < 0) perror_exit("accept");
     	/* Find client's address */
-    	//if ((rem = gethostbyaddr((char *) &client.sin_addr.s_addr, sizeof(client.sin_addr.s_addr), client.sin_family)) == NULL) {
-   	    //herror("gethostbyaddr"); exit(1);}
-    	//printf("Accepted connection from %s\n", rem->h_name);
-    	printf("Accepted connection\n");
+//    	if ((rem = gethostbyaddr((char *) &client.sin_addr.s_addr, sizeof(client.sin_addr.s_addr), client.sin_family)) == NULL) {
+//       	    herror("gethostbyaddr");
+//            exit(1);
+//        }
+        // Segment taken from https://stackoverflow.com/questions/20472072/c-socket-get-ip-address-from-filedescriptor-returned-from-accept/20475352
+        struct sockaddr_in addr;
+        socklen_t addr_size = sizeof(struct sockaddr_in);
+        int res = getpeername(newsock, (struct sockaddr *)&addr, &addr_size);
+        char *clientip = new char[20];
+        strcpy(clientip, inet_ntoa(addr.sin_addr));
+
+    	printf("Accepted connection from %s:%d\n", clientip,addr.sin_port);
     	switch (fork()) {    /* Create child for serving client */
-    	case -1:     /* Error */
-    	    perror("fork"); break;
-    	case 0:	     /* Child process */
-    	    close(sock); child_server(newsock);
-    	    exit(0);
+        	case -1:     /* Error */
+        	    perror("fork"); break;
+        	case 0:	     /* Child process */
+        	    close(sock); child_server(newsock);
+        	    exit(0);
     	}
     	close(newsock); /* parent closes socket to client            */
 			/* must be closed before it gets re-assigned */

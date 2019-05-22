@@ -19,14 +19,15 @@
 #include <stdlib.h>	         /* exit */
 #include <ctype.h>	         /* toupper */
 #include <signal.h>          /* signal */
-
+#include <string.h>
+#include <arpa/inet.h>
 
 class Server {
 private:
     int port ;
 public:
     Server(int ); // Create a server at listening at port
-    void run_server(void) ; 
+    void run_server(void) ;
     ~Server();
 protected:
 
