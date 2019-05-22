@@ -42,28 +42,28 @@ void Server::run_server(void) {
     while (1) {
         /* accept connection */
     	if ((newsock = accept(sock, clientptr, &clientlen)) < 0) perror_exit("accept");
-    	/* Find client's address */
-//    	if ((rem = gethostbyaddr((char *) &client.sin_addr.s_addr, sizeof(client.sin_addr.s_addr), client.sin_family)) == NULL) {
-//       	    herror("gethostbyaddr");
-//            exit(1);
-//        }
+
+        // Gets clients ip address and port
         // Segment taken from https://stackoverflow.com/questions/20472072/c-socket-get-ip-address-from-filedescriptor-returned-from-accept/20475352
         struct sockaddr_in addr;
         socklen_t addr_size = sizeof(struct sockaddr_in);
         int res = getpeername(newsock, (struct sockaddr *)&addr, &addr_size);
         char *clientip = new char[20];
         strcpy(clientip, inet_ntoa(addr.sin_addr));
-
+        list.addNode(addr);
     	printf("Accepted connection from %s:%d\n", clientip,addr.sin_port);
-    	switch (fork()) {    /* Create child for serving client */
-        	case -1:     /* Error */
+        /*
+    	switch (fork()) {
+        	case -1:
         	    perror("fork"); break;
-        	case 0:	     /* Child process */
+        	case 0:
         	    close(sock); child_server(newsock);
         	    exit(0);
-    	}
+    	}      */
+
     	close(newsock); /* parent closes socket to client            */
 			/* must be closed before it gets re-assigned */
+        list.print();
     }
 }
 

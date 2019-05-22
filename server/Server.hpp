@@ -22,9 +22,12 @@
 #include <string.h>
 #include <arpa/inet.h>
 
+#include "ClientList.hpp"
+
 class Server {
 private:
     int port ;
+    ClientList list ;
 public:
     Server(int ); // Create a server at listening at port
     void run_server(void) ;
