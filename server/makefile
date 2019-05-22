@@ -1,9 +1,9 @@
 # In order to execute this "Makefile" just type "make"
 #
 
-OBJS 	=  main.o
-SOURCE	= main.cpp
-HEADER  =
+OBJS 	=  main.o Server.o
+SOURCE	= main.cpp Server.cpp
+HEADER  = Server.hpp
 OUT  	= dropbox_server
 CC	= g++
 FLAGS   = -g -c -pedantic -ansi  -Wall -Wextra -Wno-missing-field-initializers \
@@ -13,10 +13,13 @@ FLAGS   = -g -c -pedantic -ansi  -Wall -Wextra -Wno-missing-field-initializers \
 
 
 # create/compile the individual files >>separately<<
-dropbox_server : main.o
-	$(CC) main.o -o dropbox_server
+dropbox_server : main.o Server.o
+	$(CC) main.o Server.o -o dropbox_server
 main.o : main.cpp
 	$(CC) $(FLAGS) main.cpp
+Server.o : Server.cpp
+	$(CC) $(FLAGS) Server.cpp
+
 # clean house
 all : dropbox_server
 clean:

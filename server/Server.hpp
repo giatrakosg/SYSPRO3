@@ -1,0 +1,36 @@
+//
+//  Server.hpp
+//  SYSPRO3
+//
+//  Created by <author> on 22/05/2019.
+//
+//
+
+#ifndef Server_hpp
+#define Server_hpp
+
+#include <stdio.h>
+#include <sys/wait.h>	     /* sockets */
+#include <sys/types.h>	     /* sockets */
+#include <sys/socket.h>	     /* sockets */
+#include <netinet/in.h>	     /* internet sockets */
+#include <netdb.h>	         /* gethostbyaddr */
+#include <unistd.h>	         /* fork */
+#include <stdlib.h>	         /* exit */
+#include <ctype.h>	         /* toupper */
+#include <signal.h>          /* signal */
+
+
+class Server {
+private:
+    int port ;
+public:
+    Server(int ); // Create a server at listening at port
+    void run_server(void) ; 
+    ~Server();
+protected:
+
+};
+
+
+#endif /* Server_hpp */

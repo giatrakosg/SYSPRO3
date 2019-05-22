@@ -3,6 +3,8 @@
 #include <string.h>
 #include <getopt.h>
 #include <iostream>
+#include "Server.hpp"
+
 // We parse the port argument
 void getArgs(int argc,char **argv,int *port, char *& port_s) {
     /* Parse cmd line parameters using getopts
@@ -46,6 +48,10 @@ int main(int argc, char **argv) {
     char *port_s ;
     int port ;
     getArgs(argc,argv,&port,port_s);
-    printf("%s %d\n",port_s , port );
+    printf("Starting dropbox server on port : %s\n",port_s );
+    Server server(port) ;
+    server.run_server();
+
+
     return 0;
 }
