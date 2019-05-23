@@ -288,8 +288,11 @@ void Server::run_ibm_server(void) {
               /* failure occurs, we will close the                 */
               /* connection.                                       */
               /*****************************************************/
-              
-              rc = recv(fds[i].fd, buffer, sizeof(buffer), 0);
+              char cmd[16] ; // Buffer to store the command
+              long ip ;
+              short port ;
+
+              rc = recv(fds[i].fd, cmd, sizeof(cmd), 0);
               if (rc < 0)
               {
                 if (errno != EWOULDBLOCK)
@@ -317,6 +320,64 @@ void Server::run_ibm_server(void) {
               len = rc;
               printf("  %d bytes received\n", len);
 
+
+              rc = recv(fds[i].fd, &ip, sizeof(long), 0);
+              if (rc < 0)
+              {
+                if (errno != EWOULDBLOCK)
+                {
+                  perror("  recv() failed");
+                  close_conn = TRUE;
+                }
+                break;
+              }
+
+              /*****************************************************/
+              /* Check to see if the connection has been           */
+              /* closed by the client                              */
+              /*****************************************************/
+              if (rc == 0)
+              {
+                printf("  Connection closed\n");
+                close_conn = TRUE;
+                break;
+              }
+
+              /*****************************************************/
+              /* Data was received                                 */
+              /*****************************************************/
+              len = rc;
+              printf("  %d bytes received\n", len);
+
+              rc = recv(fds[i].fd, &port, sizeof(short), 0);
+              if (rc < 0)
+              {
+                if (errno != EWOULDBLOCK)
+                {
+                  perror("  recv() failed");
+                  close_conn = TRUE;
+                }
+                break;
+              }
+
+              /*****************************************************/
+              /* Check to see if the connection has been           */
+              /* closed by the client                              */
+              /*****************************************************/
+              if (rc == 0)
+              {
+                printf("  Connection closed\n");
+                close_conn = TRUE;
+                break;
+              }
+
+              /*****************************************************/
+              /* Data was received                                 */
+              /*****************************************************/
+              len = rc;
+              printf("  %d bytes received\n", len);
+
+
               /*****************************************************/
               /* Echo the data back to the client                  */
               /*****************************************************/
@@ -327,7 +388,8 @@ void Server::run_ibm_server(void) {
                 close_conn = TRUE;
                 break;
               }
-
+              ip = ntohl(ip);
+              port = ntohs(port);
             } while(TRUE);
 
             /*******************************************************/

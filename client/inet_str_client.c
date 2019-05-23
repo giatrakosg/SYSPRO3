@@ -39,14 +39,17 @@ int main(int argc, char *argv[]) {
     do {
     	printf("Give input string: ");
     	fgets(buf, sizeof(buf), stdin);	/* Read from stdin*/
-    	for(i=0; buf[i] != '\0'; i++) { /* For every char */
+        write(sock,buf,sizeof(buf));
+        read(sock,buf,sizeof(buf));
+
+    	//for(i=0; buf[i] != '\0'; i++) { /* For every char */
     	    /* Send i-th character */
-        	if (write(sock, buf + i, 1) < 0)
-        	   perror_exit("write");
+        //	if (write(sock, buf + i, 1) < 0)
+        //	   perror_exit("write");
             /* receive i-th character transformed */
-        	if (read(sock, buf + i, 1) < 0)
-        	    perror_exit("read");
-    	}
+        //	if (read(sock, buf + i, 1) < 0)
+        //	    perror_exit("read");
+    	//}
     	printf("Received string: %s", buf);
     } while (strcmp(buf, "END\n") != 0); /* Finish on "end" */
     close(sock);                 /* Close socket and exit */
