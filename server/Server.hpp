@@ -22,6 +22,15 @@
 #include <string.h>
 #include <arpa/inet.h>
 
+#include <sys/ioctl.h>
+#include <sys/poll.h>
+#include <sys/time.h>
+#include <errno.h>
+
+#define TRUE             1
+#define FALSE            0
+
+
 #include "ClientList.hpp"
 
 class Server {
@@ -31,6 +40,7 @@ private:
 public:
     Server(int ); // Create a server at listening at port
     void run_server(void) ;
+    void run_ibm_server(void);
     ~Server();
 protected:
 

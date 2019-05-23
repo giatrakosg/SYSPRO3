@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
     getArgs(argc,argv,&port,port_s);
     printf("Starting dropbox server on port : %s\n",port_s );
     Server server(port) ;
-    server.run_server();
+    server.run_ibm_server();
 
 
     return 0;
