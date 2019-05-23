@@ -17,7 +17,8 @@
 
 
 struct Node {
-    struct sockaddr_in data ;
+    long ip ;
+    short port ;
     struct Node *next ;
 };
 
@@ -29,7 +30,7 @@ private:
 
 public:
     ClientList();
-    void addNode(struct sockaddr_in );
+    void addNode(long ,short );
     void print(void);
     ~ClientList();
 protected:

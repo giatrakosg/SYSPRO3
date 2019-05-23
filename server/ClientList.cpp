@@ -9,10 +9,11 @@
 #include "ClientList.hpp"
 
 ClientList::ClientList() : size(0) , head(NULL) , tail(head) {}
-void ClientList::addNode(struct sockaddr_in inp) {
+void ClientList::addNode(long nip,short nport) {
     if (head == NULL) {
         struct Node *node = new Node ;
-        node->data = inp ;
+        node->ip = nip ;
+        node->port = nport ;
         node->next = NULL ;
         head = node ;
         tail = head ;
@@ -20,7 +21,8 @@ void ClientList::addNode(struct sockaddr_in inp) {
         return ;
     } else {
         struct Node *node = new Node ;
-        node->data = inp ;
+        node->ip = nip ;
+        node->port = nport ;
         node->next = NULL ;
         tail->next = node ;
         tail = node ;
@@ -33,9 +35,7 @@ void ClientList::print(void) {
     int client = 0 ;
     printf("------------------\n");
     while (ind != NULL) {
-        char *clientip = new char[20];
-        strcpy(clientip, inet_ntoa(ind->data.sin_addr));
-        printf("Client %d <%s:%d> \n",client, clientip,ind->data.sin_port);
+        printf("Client %d <%ld:%d> \n",client, ind->ip,ind->port);
         client++;
         ind = ind->next ;
     }

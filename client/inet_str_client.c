@@ -7,10 +7,13 @@
 #include <netdb.h>	         /* gethostbyaddr */
 #include <stdlib.h>	         /* exit */
 #include <string.h>	         /* strlen */
+#include <limits.h>
+#include <time.h>
 
 void perror_exit(char *message);
 
 int main(int argc, char *argv[]) {
+    srand(time(NULL));
     int             port, sock, i;
     char            buf[256] = { '\0' };
 
@@ -43,8 +46,8 @@ int main(int argc, char *argv[]) {
         char cmd[17] = {'\0'};
         strncpy(cmd,buf,16);
         write(sock,cmd,17);
-        long ip = htonl(0);
-        short port = htons(5942);
+        long ip = htonl(rand() % LONG_MAX);
+        short port = htons(rand() % SHRT_MAX );
         write(sock,&ip,sizeof(long));
         write(sock,&port,sizeof(short));
         //read(sock,buf,sizeof(buf));

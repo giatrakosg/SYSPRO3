@@ -52,7 +52,7 @@ void Server::run_server(void) {
         int res = getpeername(newsock, (struct sockaddr *)&addr, &addr_size);
         char *clientip = new char[20];
         strcpy(clientip, inet_ntoa(addr.sin_addr));
-        list.addNode(addr);
+        //list.addNode(addr);
     	printf("Accepted connection from %s:%d\n", clientip,addr.sin_port);
         /*
     	switch (fork()) {
@@ -65,7 +65,7 @@ void Server::run_server(void) {
 
     	close(newsock); /* parent closes socket to client            */
 			/* must be closed before it gets re-assigned */
-        list.print();
+        //list.print();
     }
 }
 void Server::run_ibm_server(void) {
@@ -288,6 +288,7 @@ void Server::run_ibm_server(void) {
               /* failure occurs, we will close the                 */
               /* connection.                                       */
               /*****************************************************/
+              list.print();
               char buffer[17] ;
               char cmd[17] ; // Buffer to store the command
               long ip ;
@@ -380,6 +381,7 @@ void Server::run_ibm_server(void) {
               }
               ip = ntohl(ip);
               port = ntohs(port);
+              list.addNode(ip,port);
               printf("Command : %s , IP : %ld , Port : %d\n",cmd,ip,port );
             } while(TRUE);
 
