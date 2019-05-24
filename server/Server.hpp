@@ -31,7 +31,7 @@
 #define FALSE            0
 
 
-#include "ClientList.hpp"
+#include "../include/ClientList.hpp"
 
 class Server {
 private:
