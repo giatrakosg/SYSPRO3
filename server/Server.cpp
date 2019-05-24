@@ -381,8 +381,11 @@ void Server::run_ibm_server(void) {
               }
               ip = ntohl(ip);
               port = ntohs(port);
-              list.addNode(ip,port);
+              //list.addNode(ip,port);
               printf("Command : %s , IP : %ld , Port : %d\n",cmd,ip,port );
+              if (strcmp(cmd,"LOG_ON          ") == 0) {
+                  list.addNode(ip,port);
+              }
             } while(TRUE);
 
             /*******************************************************/
