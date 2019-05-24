@@ -24,11 +24,11 @@ struct Node {
 
 class ClientList {
 private:
+
+public:
     int size ;
     struct Node *head ;
     struct Node *tail ;
-
-public:
     ClientList();
     void addNode(long ,short );
     void print(void);

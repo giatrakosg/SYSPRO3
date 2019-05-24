@@ -12,7 +12,8 @@
 void child_server(int newsock);
 void perror_exit(char *message);
 void sigchld_handler (int sig);
-
+int Server::send_user_on(long sendip,short sendport,long usrip,short usrport) {}
+int Server::send_get_client(int socketfd) {}
 void Server::run_server(void) {
     int sock, newsock;
     struct sockaddr_in server, client;
@@ -384,7 +385,13 @@ void Server::run_ibm_server(void) {
               //list.addNode(ip,port);
               printf("Command : %s , IP : %ld , Port : %d\n",cmd,ip,port );
               if (strcmp(cmd,"LOG_ON          ") == 0) {
+                  struct Node *ind = list.head ;
+                  while (ind != NULL) {
+                      send_user_on(ind->ip,ind->port,ip,port);
+                  }
                   list.addNode(ip,port);
+              } else if (strcmp(cmd,"GET_CLIENTS     ") == 0) {
+                  send_get_clients(fds[i].fd);
               }
             } while(TRUE);
 

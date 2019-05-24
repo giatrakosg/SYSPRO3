@@ -37,6 +37,8 @@ class Server {
 private:
     int port ;
     ClientList list ;
+    int send_user_on(long ,short ,long ,short );
+    int send_get_clients(int ); // file descriptor of the socket
 public:
     Server(int ); // Create a server at listening at port
     void run_server(void) ;
