@@ -2,9 +2,9 @@
 #
 
 OBJS 	=  main.o
-SOURCE	= main.cpp
+SOURCE	= main.cpp inet_str_client.c
 HEADER  =
-OUT  	= dropbox_client
+OUT  	= dropbox_client test_client
 CC	= g++
 FLAGS   = -g -c -pedantic -ansi  -Wall -Wextra -Wno-missing-field-initializers \
 -Wno-unused-parameter
@@ -13,12 +13,14 @@ FLAGS   = -g -c -pedantic -ansi  -Wall -Wextra -Wno-missing-field-initializers \
 
 
 # create/compile the individual files >>separately<<
-dropbox_client : inet_str_client.c
-	$(CC) inet_str_client.c -o dropbox_client
+test_client : inet_str_client.c
+	$(CC) inet_str_client.c -o test_client
+dropbox_client : main.o
+	$(CC) main.o -o dropbox_client
 main.o : main.cpp
 	$(CC) $(FLAGS) main.cpp
 # clean house
-all : dropbox_client
+all : dropbox_client test_client
 clean:
 	rm -f $(OBJS) $(OUT)
 
