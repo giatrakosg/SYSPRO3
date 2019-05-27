@@ -13,17 +13,13 @@
 
 #define perror2(s,e) fprintf(stderr, "%s: %s\n", s, strerror(e))
 
-void *thread_f(void *argp){ /* Thread function */
-   printf("I am the newly created thread %ld\n", pthread_self());
-   printf("Hanging on for a couple of secs!\n");
-   sleep(2);
-   printf("I am the newly created thread and about to exit! \n");
-   pthread_exit((void *) 47);
+void *main_thread(void *argp){ /* Thread function */
+    Client *myclient = (Client *)argp ;
+    myclient->printInfo();
 }
 
 
-void getArgs(int argc,char **argv,char *& dir_name, short &port,
-int & worker_threads,int & buffer_size,short & server_port,char *& server_ip) {
+void getArgs(int argc,char **argv,char *& dir_name, short &port,int & worker_threads,int & buffer_size,short & server_port,char *& server_ip) {
     /* Parse cmd line parameters using getopts
      * Modified example found at :
      * https://www.gnu.org/software/libc/manual/html_node/Getopt-Long-Option-Example.html#Getopt-Long-Option-Example
@@ -86,27 +82,22 @@ int & worker_threads,int & buffer_size,short & server_port,char *& server_ip) {
 int main(int argc, char **argv) {
     pthread_t thr;
     int err, status;
-    
+
     char *dir ;
     short port ,server_port ;
     int wrk_ts , buff;
     char * sip ;
     getArgs(argc,argv,dir,port,wrk_ts,buff,server_port,sip);
+    Client *client = new Client(dir,port,wrk_ts,buff,server_port,sip) ;
 
-    if (err = pthread_create(&thr, NULL, thread_f, NULL)) { /* New thread */
+    if (err = pthread_create(&thr, NULL, main_thread, (void *)client)) { /* New thread */
         perror2("pthread_create", err);
         exit(1);
         }
-    printf("I am original thread %ld and I created thread %ld\n",
-             pthread_self(), thr);
     if (err = pthread_join(thr, (void **) &status)) { /* Wait for thread */
         perror2("pthread_join", err); /* termination */
         exit(1);
         }
-    else printf("Just joinned the two threads ->one!\n");
-    printf("Thread %ld exited with code %d\n", thr, status);
-    printf("Thread %ld just before exiting (Original)\n", pthread_self());
-    pthread_exit(NULL);
 
     return 0;
 }

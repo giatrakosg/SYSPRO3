@@ -10,11 +10,19 @@
 #define Client_hpp
 
 #include <stdio.h>
+#include <string.h>
 
 class Client {
 private:
+    char *dirName ;
+    short portNum ;
+    int workerThreads ;
+    int bufferSize ;
+    short serverPort ;
+    char *serverIP ;
 public:
-    Client();
+    Client(char *,short ,int ,int ,short ,char *);
+    void printInfo(void);
     ~Client();
 protected:
 
