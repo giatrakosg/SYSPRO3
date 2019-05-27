@@ -16,6 +16,7 @@
 void *main_thread(void *argp){ /* Thread function */
     Client *myclient = (Client *)argp ;
     myclient->printInfo();
+    myclient->connectToserver();
 }
 
 
