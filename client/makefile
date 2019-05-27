@@ -7,7 +7,7 @@ HEADER  =
 OUT  	= dropbox_client test_client
 CC	= g++
 FLAGS   = -g -c -pedantic -ansi  -Wall -Wextra -Wno-missing-field-initializers \
--Wno-unused-parameter
+-Wno-unused-parameter -lpthread
 # -g option enables debugging mode
 # -c flag generates object code for separate files
 
@@ -16,7 +16,7 @@ FLAGS   = -g -c -pedantic -ansi  -Wall -Wextra -Wno-missing-field-initializers \
 test_client : inet_str_client.c
 	$(CC) inet_str_client.c -o test_client
 dropbox_client : main.o
-	$(CC) main.o -o dropbox_client
+	$(CC) main.o -o dropbox_client -lpthread
 main.o : main.cpp
 	$(CC) $(FLAGS) main.cpp
 # clean house
