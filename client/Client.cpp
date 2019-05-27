@@ -49,7 +49,10 @@ int Client::connectToserver(void) {
 	   perror_exit("connect");
     printf("Connecting to %s port %d\n", serverIP, serverPort);
     char command_log_on[17] = {'\0'};
+    char command_get_clients[17] = {'\0'} ;
     strcpy(command_log_on,"LOG_ON          ");
+    strcpy(command_get_clients,"GET_CLIENTS     ");
+
     write(sock,command_log_on,17);
     long ip ;
 
@@ -83,6 +86,8 @@ int Client::connectToserver(void) {
     short myport = htons(portNum);
     write(sock,&ip,sizeof(long));
     write(sock,&myport,sizeof(short));
+    write(sock,command_get_clients,17);
+    
     close(sock);                 /* Close socket and exit */
 
     return 0 ;

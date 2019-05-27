@@ -305,80 +305,66 @@ void Server::run_ibm_server(void) {
                 }
                 break;
               }
-
-              /*****************************************************/
-              /* Check to see if the connection has been           */
-              /* closed by the client                              */
-              /*****************************************************/
-              if (rc == 0)
-              {
-                printf("  Connection closed\n");
-                close_conn = TRUE;
-                break;
-              }
               strcpy(cmd,buffer);
-              /*****************************************************/
-              /* Data was received                                 */
-              /*****************************************************/
-              rc = recv(fds[i].fd, &ip, sizeof(long), 0);
-              if (rc < 0)
-              {
-                if (errno != EWOULDBLOCK)
-                {
-                  perror("  recv() failed");
-                  close_conn = TRUE;
-                }
-                break;
-              }
 
-              /*****************************************************/
-              /* Check to see if the connection has been           */
-              /* closed by the client                              */
-              /*****************************************************/
-              if (rc == 0)
-              {
-                printf("  Connection closed\n");
-                close_conn = TRUE;
-                break;
-              }
-
-              /*****************************************************/
-              /* Data was received                                 */
-              /*****************************************************/
-              rc = recv(fds[i].fd, &port, sizeof(short), 0);
-              if (rc < 0)
-              {
-                if (errno != EWOULDBLOCK)
-                {
-                  perror("  recv() failed");
-                  close_conn = TRUE;
-                }
-                break;
-              }
-
-              /*****************************************************/
-              /* Check to see if the connection has been           */
-              /* closed by the client                              */
-              /*****************************************************/
-              if (rc == 0)
-              {
-                printf("  Connection closed\n");
-                close_conn = TRUE;
-                break;
-              }
-              ip = ntohl(ip);
-              port = ntohs(port);
               //list.addNode(ip,port);
-              printf("Command : %s , IP : %ld , Port : %d\n",cmd,ip,port );
+              printf("Command : %s ",cmd);
               if (strcmp(cmd,"LOG_ON          ") == 0) {
+                  /*****************************************************/
+                  /* Data was received                                 */
+                  /*****************************************************/
+                  rc = recv(fds[i].fd, &ip, sizeof(long), 0);
+                  if (rc < 0)
+                  {
+                    if (errno != EWOULDBLOCK)
+                    {
+                      perror("  recv() failed");
+                      close_conn = TRUE;
+                    }
+                    break;
+                  }
+                  /*****************************************************/
+                  /* Data was received                                 */
+                  /*****************************************************/
+                  rc = recv(fds[i].fd, &port, sizeof(short), 0);
+                  if (rc < 0)
+                  {
+                    if (errno != EWOULDBLOCK)
+                    {
+                      perror("  recv() failed");
+                      close_conn = TRUE;
+                    }
+                    break;
+                  }
+
+                  /*****************************************************/
+                  /* Check to see if the connection has been           */
+                  /* closed by the client                              */
+                  /*****************************************************/
+                  if (rc == 0)
+                  {
+                    printf("  Connection closed\n");
+                    close_conn = TRUE;
+                    break;
+                  }
+
                   struct Node *ind = list.head ;
                   while (ind != NULL) {
                       send_user_on(ind->ip,ind->port,ip,port);
                       ind = ind->next;
                   }
+                  ip = ntohl(ip);
+                  port = ntohs(port);
                   list.addNode(ip,port);
               } else if (strcmp(cmd,"GET_CLIENTS     ") == 0) {
                   send_get_clients(fds[i].fd);
+                  if (rc == 0)
+                  {
+                    printf("  Connection closed\n");
+                    close_conn = TRUE;
+                    break;
+                  }
+
               } else if (strcmp(cmd,"LOG_OFF         ") == 0) {
                   struct sockaddr_in addr;
                   socklen_t addr_size = sizeof(struct sockaddr_in);
