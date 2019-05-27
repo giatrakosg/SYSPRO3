@@ -20,6 +20,11 @@
 #include <string.h>	         /* strlen */
 #include <limits.h>
 #include <time.h>
+#include <unistd.h> 
+#include <errno.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
 
 class Client {
 private:

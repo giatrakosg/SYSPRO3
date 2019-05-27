@@ -366,20 +366,6 @@ void Server::run_ibm_server(void) {
                 close_conn = TRUE;
                 break;
               }
-
-              /*****************************************************/
-              /* Data was received                                 */
-              /*****************************************************/
-              /*****************************************************/
-              /* Echo the data back to the client                  */
-              /*****************************************************/
-              rc = send(fds[i].fd, buffer, len, 0);
-              if (rc < 0)
-              {
-                perror("  send() failed");
-                close_conn = TRUE;
-                break;
-              }
               ip = ntohl(ip);
               port = ntohs(port);
               //list.addNode(ip,port);
@@ -388,6 +374,7 @@ void Server::run_ibm_server(void) {
                   struct Node *ind = list.head ;
                   while (ind != NULL) {
                       send_user_on(ind->ip,ind->port,ip,port);
+                      ind = ind->next;
                   }
                   list.addNode(ip,port);
               } else if (strcmp(cmd,"GET_CLIENTS     ") == 0) {

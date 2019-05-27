@@ -6,3 +6,4 @@
 # Πηγες
 * Εχει χρησιμοποιηθει κωδικας απο το https://www.ibm.com/support/knowledgecenter/en/ssw_ibm_i_74/rzab6/poll.htm
  ως σκελετος για ενα server με poll.
+* Εχει χρηιμοποιηθει κωδικας απο το https://www.geeksforgeeks.org/c-program-display-hostname-ip-address/ για την ευρεση της τοπικης ip .

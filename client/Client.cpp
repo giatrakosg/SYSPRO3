@@ -47,30 +47,44 @@ int Client::connectToserver(void) {
     /* Initiate connection */
     if (connect(sock, serverptr, sizeof(server)) < 0)
 	   perror_exit("connect");
-    printf("Connecting to %s port %d\n", serverIP, port);
-    do {
-    	printf("Give input string: ");
-    	fgets(buf, sizeof(buf), stdin);	/* Read from stdin*/
-        buf[strcspn(buf, "\r\n")] = 0;
-        char cmd[17] = {'\0'};
-        strncpy(cmd,buf,16);
-        write(sock,cmd,17);
-        long ip = htonl(rand() % LONG_MAX);
-        short port = htons(rand() % SHRT_MAX );
-        write(sock,&ip,sizeof(long));
-        write(sock,&port,sizeof(short));
-        //read(sock,buf,sizeof(buf));
+    printf("Connecting to %s port %d\n", serverIP, serverPort);
+    char command_log_on[17] = {'\0'};
+    strcpy(command_log_on,"LOG_ON          ");
+    write(sock,command_log_on,17);
+    long ip ;
 
-    	//for(i=0; buf[i] != '\0'; i++) { /* For every char */
-    	    /* Send i-th character */
-        //	if (write(sock, buf + i, 1) < 0)
-        //	   perror_exit("write");
-            /* receive i-th character transformed */
-        //	if (read(sock, buf + i, 1) < 0)
-        //	    perror_exit("read");
-    	//}
-    } while (strcmp(buf, "END") != 0); /* Finish on "end" */
+    char hostbuffer[256];
+	char *IPbuffer;
+	struct hostent *host_entry;
+	int hostname;
+
+    hostname = gethostname(hostbuffer, sizeof(hostbuffer));
+
+	// To retrieve host information
+	host_entry = gethostbyname(hostbuffer);
+    if (host_entry == NULL)
+	{
+		perror("gethostbyname");
+		exit(1);
+	}
+
+	// To convert an Internet network
+	// address into ASCII string
+	IPbuffer = inet_ntoa(*((struct in_addr*)
+						host_entry->h_addr_list[0]));
+                        if (NULL == IPbuffer)
+                    	{
+                    		perror("inet_ntoa");
+                    		exit(1);
+                    	}
+
+
+    ip=inet_addr(IPbuffer);
+    short myport = htons(portNum);
+    write(sock,&ip,sizeof(long));
+    write(sock,&myport,sizeof(short));
     close(sock);                 /* Close socket and exit */
+
     return 0 ;
 
 }
