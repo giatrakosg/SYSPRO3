@@ -13,6 +13,7 @@ void child_server(int newsock);
 void perror_exit(char *message);
 void sigchld_handler (int sig);
 int Server::first_connection(int sock_fd) {
+    list.print();
     char buffer[17] ;
     char cmd[17] ; // Buffer to store the command
 
@@ -45,6 +46,8 @@ int Server::first_connection(int sock_fd) {
       }
       return -1 ;
     }
+
+
     // Send user_on command to each client
     struct Node *ind = list.head ;
     while (ind != NULL) {
@@ -90,6 +93,33 @@ int Server::send_get_clients(int socketfd) {
 }
 
 void Server::run_server(void) {
+    char hostbuffer[256];
+	char *IPbuffer;
+	struct hostent *host_entry;
+	int hostname;
+
+    hostname = gethostname(hostbuffer, sizeof(hostbuffer));
+
+	// To retrieve host information
+	host_entry = gethostbyname(hostbuffer);
+    if (host_entry == NULL)
+	{
+		perror("gethostbyname");
+		exit(1);
+	}
+
+	// To convert an Internet network
+	// address into ASCII string
+	IPbuffer = inet_ntoa(*((struct in_addr*)
+						host_entry->h_addr_list[0]));
+                        if (NULL == IPbuffer)
+                    	{
+                    		perror("inet_ntoa");
+                    		exit(1);
+                    	}
+    printf("Server IP : %s\n",IPbuffer );
+
+
 
       int    rc, on = 1;
       int    listen_sd = -1, new_sd = -1;
@@ -308,11 +338,9 @@ void Server::run_server(void) {
               /* failure occurs, we will close the                 */
               /* connection.                                       */
               /*****************************************************/
-              list.print();
-              char buffer[17] ;
-              char cmd[17] ; // Buffer to store the command
+              char buffer[17] = {'\0'} ;
+              char cmd[17] = {'\0'}; // Buffer to store the command
               rc = recv(fds[i].fd, buffer,17, 0);
-              strcpy(cmd,buffer);
               if (rc < 0)
               {
                 if (errno != EWOULDBLOCK)
@@ -322,10 +350,19 @@ void Server::run_server(void) {
                 }
                 break;
               }
+              if (rc == 0)
+              {
+                printf("  Connection closed\n");
+                close_conn = TRUE;
+                break;
+              }
+
               strcpy(cmd,buffer);
+              if (cmd[0] != NULL) {
+                  printf("Command : %s \n",cmd);
+              }
 
               //list.addNode(ip,port);
-              printf("Command : %s \n",cmd);
               if (strcmp(cmd,"LOG_ON          ") == 0) {
                   first_connection(fds[i].fd);
               }
