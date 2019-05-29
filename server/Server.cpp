@@ -77,6 +77,7 @@ int Server::first_connection(int sock_fd) {
     if (strcmp(cmd,"GET_CLIENTS     ") == 0) {
         printf("Received Get_Clients\n");
     }
+    return 0 ;
 
 }
 int Server::send_user_on(long sendip,short sendport,long usrip,short usrport) {
@@ -84,13 +85,15 @@ int Server::send_user_on(long sendip,short sendport,long usrip,short usrport) {
 
 
 }
-int Server::send_get_clients(int socketfd) {}
+int Server::send_get_clients(int socketfd) {
+    return 0 ;
+}
 
 void Server::run_server(void) {
 
       int    rc, on = 1;
       int    listen_sd = -1, new_sd = -1;
-      int    desc_ready, end_server = FALSE, compress_array = FALSE;
+      int    end_server = FALSE, compress_array = FALSE;
 
       struct sockaddr_in6   addr;
       int    timeout;
@@ -308,8 +311,6 @@ void Server::run_server(void) {
               list.print();
               char buffer[17] ;
               char cmd[17] ; // Buffer to store the command
-              long ip ;
-              short port ;
               rc = recv(fds[i].fd, buffer,17, 0);
               strcpy(cmd,buffer);
               if (rc < 0)
@@ -327,16 +328,8 @@ void Server::run_server(void) {
               printf("Command : %s \n",cmd);
               if (strcmp(cmd,"LOG_ON          ") == 0) {
                   first_connection(fds[i].fd);
-              } else if (strcmp(cmd,"GET_CLIENTS     ") == 0) {
-                  send_get_clients(fds[i].fd);
-                  if (rc == 0)
-                  {
-                    printf("Connection closed\n");
-                    close_conn = TRUE;
-                    break;
-                  }
-
-              } else if (strcmp(cmd,"LOG_OFF         ") == 0) {
+              }
+              else if (strcmp(cmd,"LOG_OFF         ") == 0) {
                   struct sockaddr_in addr;
                   socklen_t addr_size = sizeof(struct sockaddr_in);
                   if(getpeername(fds[i].fd, (struct sockaddr *)&addr, &addr_size) <  0) {

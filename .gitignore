@@ -1,0 +1,4 @@
+**/*.o
+client/dropbox_client
+client/test_client
+server/dropbox_server
