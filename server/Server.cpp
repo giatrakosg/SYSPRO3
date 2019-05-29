@@ -12,70 +12,86 @@
 void child_server(int newsock);
 void perror_exit(char *message);
 void sigchld_handler (int sig);
-int Server::send_user_on(long sendip,short sendport,long usrip,short usrport) {}
-int Server::send_get_clients(int socketfd) {}
-void Server::run_server(void) {
-    int sock, newsock;
-    struct sockaddr_in server, client;
-    socklen_t clientlen;
+int Server::first_connection(int sock_fd) {
+    char buffer[17] ;
+    char cmd[17] ; // Buffer to store the command
 
-    struct sockaddr *serverptr=(struct sockaddr *)&server;
-    struct sockaddr *clientptr=(struct sockaddr *)&client;
-    struct hostent *rem;
-
-    /* Reap dead children asynchronously */
-    signal(SIGCHLD, sigchld_handler);
-    /* Create socket */
-    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-        perror_exit("socket");
-
-    server.sin_family = AF_INET;       /* Internet domain */
-    server.sin_addr.s_addr = htonl(INADDR_ANY);
-    server.sin_port = htons(port);      /* The given port */
-
-    /* Bind socket to address */
-    if (bind(sock, serverptr, sizeof(server)) < 0)
-        perror_exit("bind");
-
-    /* Listen for connections */
-    if (listen(sock, 5) < 0) perror_exit("listen");
-    printf("Listening for connections to port %d\n", port);
-    while (1) {
-        /* accept connection */
-    	if ((newsock = accept(sock, clientptr, &clientlen)) < 0)
-            perror_exit("accept");
-
-        // Gets clients ip address and port
-        // Segment taken from
-        //https://stackoverflow.com/questions/20472072/c-socket-get-ip-address-from-filedescriptor-returned-from-accept/20475352
-        struct sockaddr_in addr;
-        socklen_t addr_size = sizeof(struct sockaddr_in);
-        int res = getpeername(newsock, (struct sockaddr *)&addr, &addr_size);
-        char *clientip = new char[20];
-        strcpy(clientip, inet_ntoa(addr.sin_addr));
-        //list.addNode(addr);
-    	printf("Accepted connection from %s:%d\n", clientip,addr.sin_port);
-        /*
-    	switch (fork()) {
-        	case -1:
-        	    perror("fork"); break;
-        	case 0:
-        	    close(sock); child_server(newsock);
-        	    exit(0);
-    	}      */
-
-    	close(newsock); /* parent closes socket to client            */
-			/* must be closed before it gets re-assigned */
-        //list.print();
+    unsigned long ip ;
+    unsigned short port ;
+    int rc ;
+    /*****************************************************/
+    /* Data was received                                 */
+    /*****************************************************/
+    rc = recv(sock_fd, &ip, sizeof(long), 0);
+    if (rc < 0)
+    {
+      if (errno != EWOULDBLOCK)
+      {
+        perror("  recv() failed");
+        close_conn = TRUE;
+      }
+      return -1 ;
     }
-}
-void Server::run_ibm_server(void) {
+    /*****************************************************/
+    /* Data was received                                 */
+    /*****************************************************/
+    rc = recv(sock_fd, &port, sizeof(short), 0);
+    if (rc < 0)
+    {
+      if (errno != EWOULDBLOCK)
+      {
+        perror("  recv() failed");
+        close_conn = TRUE;
+      }
+      return -1 ;
+    }
+    // Send user_on command to each client
+    struct Node *ind = list.head ;
+    while (ind != NULL) {
+        send_user_on(ind->ip,ind->port,ip,port);
+        ind = ind->next;
+    }
 
-      int    len, rc, on = 1;
+    // Store in network order
+    ip = ntohl(ip);
+    port = ntohs(port);
+    list.addNode(ip,port);
+
+    // Receive get_clients command over same connection
+    while(1) {
+        rc = recv(sock_fd, buffer,17, 0);
+        if (rc < 0)
+        {
+            if (errno != EWOULDBLOCK)
+            {
+                perror("  recv() failed");
+                close_conn = TRUE;
+            }
+            return -1 ;
+        } else if (rc > 0) {
+            break ;
+        }
+    }
+
+    strcpy(cmd,buffer);
+    if (strcmp(cmd,"GET_CLIENTS     ") == 0) {
+        printf("Received Get_Clients\n");
+    }
+
+}
+int Server::send_user_on(long sendip,short sendport,long usrip,short usrport) {
+    return 0 ;
+
+
+}
+int Server::send_get_clients(int socketfd) {}
+
+void Server::run_server(void) {
+
+      int    rc, on = 1;
       int    listen_sd = -1, new_sd = -1;
       int    desc_ready, end_server = FALSE, compress_array = FALSE;
-      int    close_conn;
-      char   buffer[80];
+
       struct sockaddr_in6   addr;
       int    timeout;
       struct pollfd fds[200];
@@ -308,59 +324,14 @@ void Server::run_ibm_server(void) {
               strcpy(cmd,buffer);
 
               //list.addNode(ip,port);
-              printf("Command : %s ",cmd);
+              printf("Command : %s \n",cmd);
               if (strcmp(cmd,"LOG_ON          ") == 0) {
-                  /*****************************************************/
-                  /* Data was received                                 */
-                  /*****************************************************/
-                  rc = recv(fds[i].fd, &ip, sizeof(long), 0);
-                  if (rc < 0)
-                  {
-                    if (errno != EWOULDBLOCK)
-                    {
-                      perror("  recv() failed");
-                      close_conn = TRUE;
-                    }
-                    break;
-                  }
-                  /*****************************************************/
-                  /* Data was received                                 */
-                  /*****************************************************/
-                  rc = recv(fds[i].fd, &port, sizeof(short), 0);
-                  if (rc < 0)
-                  {
-                    if (errno != EWOULDBLOCK)
-                    {
-                      perror("  recv() failed");
-                      close_conn = TRUE;
-                    }
-                    break;
-                  }
-
-                  /*****************************************************/
-                  /* Check to see if the connection has been           */
-                  /* closed by the client                              */
-                  /*****************************************************/
-                  if (rc == 0)
-                  {
-                    printf("  Connection closed\n");
-                    close_conn = TRUE;
-                    break;
-                  }
-
-                  struct Node *ind = list.head ;
-                  while (ind != NULL) {
-                      send_user_on(ind->ip,ind->port,ip,port);
-                      ind = ind->next;
-                  }
-                  ip = ntohl(ip);
-                  port = ntohs(port);
-                  list.addNode(ip,port);
+                  first_connection(fds[i].fd);
               } else if (strcmp(cmd,"GET_CLIENTS     ") == 0) {
                   send_get_clients(fds[i].fd);
                   if (rc == 0)
                   {
-                    printf("  Connection closed\n");
+                    printf("Connection closed\n");
                     close_conn = TRUE;
                     break;
                   }
@@ -368,7 +339,9 @@ void Server::run_ibm_server(void) {
               } else if (strcmp(cmd,"LOG_OFF         ") == 0) {
                   struct sockaddr_in addr;
                   socklen_t addr_size = sizeof(struct sockaddr_in);
-                  int res = getpeername(fds[i].fd, (struct sockaddr *)&addr, &addr_size);
+                  if(getpeername(fds[i].fd, (struct sockaddr *)&addr, &addr_size) <  0) {
+                      perror("getpeername");
+                  }
                   char *clientip = new char[20];
                   strcpy(clientip, inet_ntoa(addr.sin_addr));
                   //list.addNode(addr);
@@ -428,19 +401,6 @@ void Server::run_ibm_server(void) {
         if(fds[i].fd >= 0)
           close(fds[i].fd);
       }
-}
-void child_server(int newsock) {
-    char buf[1];
-    while(read(newsock, buf, 1) > 0) {  /* Receive 1 char */
-    	putchar(buf[0]);           /* Print received char */
-    	/* Capitalize character */
-    	buf[0] = toupper(buf[0]);
-    	/* Reply */
-    	if (write(newsock, buf, 1) < 0)
-    	    perror_exit("write");
-    }
-    printf("Closing connection.\n");
-    close(newsock);	  /* Close socket */
 }
 
 /* Wait for all dead child processes */
