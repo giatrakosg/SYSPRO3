@@ -6,7 +6,7 @@ SOURCE	= main.cpp Server.cpp
 HEADER  = Server.hpp ClientList.hpp
 OUT  	= dropbox_server
 CC	= g++
-FLAGS   = -g -c -pedantic -ansi  -Wall -Wextra -Wno-missing-field-initializers \
+FLAGS   = -g -c -pedantic -ansi  -Wall -Wextra -Wno-missing-field-initializers -Wno-write-strings \
 -Wno-unused-parameter
 # -g option enables debugging mode
 # -c flag generates object code for separate files

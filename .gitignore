@@ -1,4 +1,7 @@
 **/*.o
 client/dropbox_client
 client/test_client
+client/inet_str_client.c
+client/inet_str_server.c
+client/a.out
 server/dropbox_server

@@ -17,8 +17,8 @@ int Server::first_connection(int sock_fd) {
     char buffer[17] ;
     char cmd[17] ; // Buffer to store the command
 
-    unsigned long ip ;
-    unsigned short port ;
+    long ip ;
+    short port ;
     int rc ;
     /*****************************************************/
     /* Data was received                                 */
@@ -84,6 +84,41 @@ int Server::first_connection(int sock_fd) {
 
 }
 int Server::send_user_on(long sendip,short sendport,long usrip,short usrport) {
+    int             sock;
+
+    struct in_addr ip_addr;
+    ip_addr.s_addr = htonl(sendip);
+    printf("The IP address is %s\n", inet_ntoa(ip_addr));
+
+
+    struct sockaddr_in server;
+    struct sockaddr *serverptr = (struct sockaddr*)&server;
+    struct hostent *rem;
+
+
+	/* Create socket */
+    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+    	perror_exit("socket");
+	/* Find server address */
+    if ((rem = gethostbyname(inet_ntoa(ip_addr))) == NULL) {
+	   herror("gethostbyname"); exit(1);
+    }
+
+    server.sin_family = AF_INET;       /* Internet domain */
+    memcpy(&server.sin_addr, rem->h_addr, rem->h_length);
+    server.sin_port = htons(sendport);         /* Server port */
+    /* Initiate connection */
+    if (connect(sock, serverptr, sizeof(server)) < 0)
+	   perror_exit("connect");
+    char cmd_user_on[17] ;
+    strcpy(cmd_user_on,"USER_ON         ");
+    write(sock,cmd_user_on,17);
+    write(sock,&usrip,sizeof(long));
+    write(sock,&usrport,sizeof(short));
+    sleep(2);
+    close(sock);                 /* Close socket and exit */
+    return 0 ;
+
     return 0 ;
 
 

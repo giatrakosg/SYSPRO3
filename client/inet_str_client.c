@@ -42,24 +42,24 @@ int main(int argc, char *argv[]) {
     do {
     	printf("Give input string: ");
     	fgets(buf, sizeof(buf), stdin);	/* Read from stdin*/
-        buf[strcspn(buf, "\r\n")] = 0;
+        //buf[strcspn(buf, "\r\n")] = 0;
         char cmd[17] = {'\0'};
         strncpy(cmd,buf,16);
         write(sock,cmd,17);
-        long ip = htonl(rand() % LONG_MAX);
-        short port = htons(rand() % SHRT_MAX );
-        write(sock,&ip,sizeof(long));
-        write(sock,&port,sizeof(short));
+        //long ip = htonl(rand() % LONG_MAX);
+        //short port = htons(rand() % SHRT_MAX );
+        //write(sock,&ip,sizeof(long));
+        //write(sock,&port,sizeof(short));
         //read(sock,buf,sizeof(buf));
 
-    	//for(i=0; buf[i] != '\0'; i++) { /* For every char */
+    	for(i=0; buf[i] != '\0'; i++) { /* For every char */
     	    /* Send i-th character */
-        //	if (write(sock, buf + i, 1) < 0)
-        //	   perror_exit("write");
+        	if (write(sock, buf + i, 1) < 0)
+        	   perror_exit("write");
             /* receive i-th character transformed */
-        //	if (read(sock, buf + i, 1) < 0)
-        //	    perror_exit("read");
-    	//}
+        	if (read(sock, buf + i, 1) < 0)
+        	    perror_exit("read");
+    	}
     } while (strcmp(buf, "END") != 0); /* Finish on "end" */
     close(sock);                 /* Close socket and exit */
     return 0 ;
