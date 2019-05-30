@@ -418,8 +418,8 @@ void Server::run_server(void) {
                   char *clientip = new char[20];
                   strcpy(clientip, inet_ntoa(addr.sin_addr));
                   //list.addNode(addr);
-                  printf("Accepted connection from %s:%d\n", clientip,addr.sin_port);
-
+                  printf("Accepted connection from %ld:%d\n", addr.sin_addr.s_addr,addr.sin_port);
+                 // remove_user()
               }
             } while(TRUE);
 

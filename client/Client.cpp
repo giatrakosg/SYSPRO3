@@ -101,10 +101,9 @@ int Client::connectToserver(void) {
         recv(sock,&(ports[i]),sizeof(short),0);
         printf("<%ld,%d> \n",ips[i],ports[i] );
     }
-
-
-
-
+    char cmd_log_off[17] ;
+    strcpy(cmd_log_off,"LOG_OFF         ");
+    send(sock,cmd_log_off,17,0);
 
     close(sock);                 /* Close socket and exit */
 
