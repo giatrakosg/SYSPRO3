@@ -78,7 +78,7 @@ int Server::first_connection(int sock_fd) {
 
     strcpy(cmd,buffer);
     if (strcmp(cmd,"GET_CLIENTS     ") == 0) {
-        printf("Received Get_Clients\n");
+        send_client_list(sock_fd);
     }
     return 0 ;
 
@@ -119,11 +119,19 @@ int Server::send_user_on(long sendip,short sendport,long usrip,short usrport) {
     close(sock);                 /* Close socket and exit */
     return 0 ;
 
-    return 0 ;
-
 
 }
-int Server::send_get_clients(int socketfd) {
+int Server::send_client_list(int socketfd) {
+    char cmd_client_list[17] ;
+    strcpy(cmd_client_list,"CLIENT_LIST     ");
+    write(socketfd,cmd_client_list,17);
+    write(socketfd,&(list.size),sizeof(int));
+    struct Node *ind = list.head ;
+    while(ind != NULL) {
+        write(socketfd,&(ind->ip),sizeof(long));
+        write(socketfd,&(ind->port),sizeof(short));
+        ind = ind->next ;
+    }
     return 0 ;
 }
 

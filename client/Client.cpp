@@ -87,7 +87,25 @@ int Client::connectToserver(void) {
     write(sock,&ip,sizeof(long));
     write(sock,&myport,sizeof(short));
     write(sock,command_get_clients,17);
-    
+    char cmd[17] ;
+    recv(sock,cmd,17,0); // Receive client list
+    printf("Received command : %s\n",cmd );
+    int size ;
+    recv(sock,&size,sizeof(int),0);
+    printf("Received size : %d\n",size );
+    long *ips = new long[size];
+    short *ports = new short[size];
+
+    for (int i = 0; i < size; i++) {
+        recv(sock,&(ips[i]),sizeof(long),0);
+        recv(sock,&(ports[i]),sizeof(short),0);
+        printf("<%ld,%d> \n",ips[i],ports[i] );
+    }
+
+
+
+
+
     close(sock);                 /* Close socket and exit */
 
     return 0 ;

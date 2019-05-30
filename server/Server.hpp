@@ -40,7 +40,7 @@ private:
     ClientList list ;
     int first_connection(int ) ; // Called when a new connection is made (LOG_ON)
     int send_user_on(long ,short ,long ,short );
-    int send_get_clients(int ); // file descriptor of the socket
+    int send_client_list(int ); // file descriptor of the socket
 public:
     Server(int ); // Create a server at listening at port
     void run_server(void);
