@@ -75,11 +75,11 @@ int Client::connectToserver(void) {
 	// address into ASCII string
 	IPbuffer = inet_ntoa(*((struct in_addr*)
 						host_entry->h_addr_list[0]));
-                        if (NULL == IPbuffer)
-                    	{
-                    		perror("inet_ntoa");
-                    		exit(1);
-                    	}
+    if (NULL == IPbuffer)
+	{
+		perror("inet_ntoa");
+		exit(1);
+	}
 
 
     ip=inet_addr(IPbuffer);
