@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <string.h>
+#include <stdlib.h>
 
 struct CBNode {
     long  ip            ;
@@ -31,7 +32,7 @@ private:
     pthread_cond_t  isempty ;
     pthread_cond_t  isfull  ;
     int             length  ;
-    int             cap     ;
+    int             curr    ;
     CBNode **       data    ;
     pthread_mutex_t mtx     ;
 public:
