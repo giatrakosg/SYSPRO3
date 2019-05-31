@@ -12,7 +12,7 @@ void perror_exit(char *message)
     perror(message);
     exit(EXIT_FAILURE);
 }
-void *worker_thread(void *_args){ /* Thread function */
+void *worker_thread_f(void *_args){ /* Thread function */
     worker_t_arguments *args = (struct worker_t_arguments *)_args ;
     ClientList *list = args->first ;
     CircularBuffer *buffer = args->second ;
@@ -116,6 +116,18 @@ int Client::connectToserver(void) {
     //char cmd_log_off[17] ;
     //strcpy(cmd_log_off,"LOG_OFF         ");
     //send(sock,cmd_log_off,17,0);
+    pthread_t wthreads[workerThreads];
+    struct worker_t_arguments *args = new struct worker_t_arguments ;
+    args->first = &list ;
+    args->second = buffer ;
+    int err ;
+    for (int i = 0; i < workerThreads; i++) {
+        if (err=pthread_create(&wthreads[i],NULL,worker_thread_f,(void *)args)) {
+            /* Create threads 0, 1, 2 */
+            perror2("pthread_create", err); exit(1);
+            }
+    }
+
 
     close(sock);                 /* Close socket and exit */
 

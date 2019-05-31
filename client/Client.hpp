@@ -10,6 +10,7 @@
 #define Client_hpp
 
 #include <stdio.h>
+#include <iostream>
 #include <string.h>
 #include <sys/types.h>	     /* sockets */
 #include <sys/socket.h>	     /* sockets */
