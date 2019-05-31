@@ -25,14 +25,14 @@ class CircularBuffer {
 private:
     int             head    ;
     int             tail    ;
-    bool            isempty ;
-    bool            isFull  ;
-    int             size    ;
+    pthread_cond_t  isempty ;
+    pthread_cond_t  isfull  ;
+    int             length  ;
+    int             cap     ;
     CBNode *        data    ;
     pthread_mutex_t mtx     ;
-    pthread_cond_t  cvar    ;
 public:
-    CircularBuffer();
+    CircularBuffer(int );
     int put(long ,short ,char *,char *);
     int get(long &,short &,char *&,char *&);
     ~CircularBuffer();
