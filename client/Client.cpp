@@ -27,7 +27,6 @@ Client::Client(char *dir,short port,int worker,int buffer,short sport,char *sip)
 
 }
 int Client::connectToserver(void) {
-    srand(time(NULL));
     int             port, sock, i;
     char            buf[256] = { '\0' };
 
@@ -99,11 +98,15 @@ int Client::connectToserver(void) {
     for (int i = 0; i < size; i++) {
         recv(sock,&(ips[i]),sizeof(long),0);
         recv(sock,&(ports[i]),sizeof(short),0);
-        printf("<%ld,%d> \n",ips[i],ports[i] );
+        ips[i] = ntohl(ips[i]) ;
+        ports[i] = ntohs(ports[i]) ;
+
+        // Add the data on our clientlist
+        list.addNode(ips[i],ports[i]);
     }
-    char cmd_log_off[17] ;
-    strcpy(cmd_log_off,"LOG_OFF         ");
-    send(sock,cmd_log_off,17,0);
+    //char cmd_log_off[17] ;
+    //strcpy(cmd_log_off,"LOG_OFF         ");
+    //send(sock,cmd_log_off,17,0);
 
     close(sock);                 /* Close socket and exit */
 

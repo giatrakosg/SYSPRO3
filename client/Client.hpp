@@ -25,11 +25,15 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#include "../include/ClientList.hpp"
+
 
 class Client {
 private:
     char *strIP ; // This clients ip in string format
     long ip ; // This clients ip in long form
+
+    ClientList list ;
 
     char *dirName ;
     short portNum ;

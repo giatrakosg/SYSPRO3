@@ -14,8 +14,8 @@
 #include <netinet/in.h>	     /* internet sockets */
 #include <arpa/inet.h>
 #include <string.h>
-
-
+#define NO_NODE -1 ;
+#define DUP_NODE -2 ;
 struct Node {
     long ip ;
     short port ;
@@ -24,13 +24,26 @@ struct Node {
 
 class ClientList {
 private:
-
+    bool ismember(long fip,short fport) {
+        struct Node *ind = head ;
+        while (ind != NULL) {
+            if ((ind->ip == fip) && (ind->port == fport)) {
+                return true ;
+            }
+            ind = ind->next ;
+        }
+        return false ;
+    }
 public:
     int size ;
     struct Node *head ;
     struct Node *tail ;
     ClientList() : size(0) , head(NULL) {};
-    void addNode(long nip,short nport ) {
+    int addNode(long nip,short nport ) {
+        // If a node with same data already
+        if (ismember(nip,nport)) {
+            return DUP_NODE ;
+        }
         if (head == NULL) {
             struct Node *node = new Node ;
             node->ip = nip ;
@@ -39,7 +52,7 @@ public:
             head = node ;
             tail = head ;
             size++;
-            return ;
+            return 0;
         } else {
             struct Node *node = new Node ;
             node->ip = nip ;
@@ -48,8 +61,9 @@ public:
             tail->next = node ;
             tail = node ;
             size++;
-            return ;
+            return 0 ;
         }
+        return 0 ;
     }
     void print(void) {
         struct Node *ind = head ;
@@ -62,6 +76,43 @@ public:
         }
         printf("------------------\n" );
 
+    }
+    int remove(long rip,short rport) {
+        // If there is no node with this data then return -1
+        if (!ismember(rip,rport)) {
+            return NO_NODE ;
+        }
+
+        struct Node *it = head->next ;
+        struct Node *prev = head ;
+        // The is only one entry on the list
+        // The coin is in the top of the list
+        if ((head->ip == rip) && (head->port == rport)) {
+            if (head == tail) {
+                tail = head->next ;
+            }
+            head = head->next ;
+            return 0;
+        }
+        if (it == NULL) {
+            if ((prev->ip == rip) && (prev->port == rport)) {
+                head  = NULL ;
+                tail = NULL ;
+            }
+            return 0;
+        }
+        while (it != NULL) {
+            if ((it->ip == rip) && (it->port == rport)) {
+                if (it == tail) {
+                    tail = prev ;
+                }
+                prev->next = it->next ;
+                return 0;
+            }
+            prev = it ;
+            it = it->next ;
+        }
+        return 0 ;
     }
     ~ClientList() {}
 protected:
