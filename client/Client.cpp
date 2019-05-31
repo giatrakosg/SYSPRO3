@@ -12,18 +12,27 @@ void perror_exit(char *message)
     perror(message);
     exit(EXIT_FAILURE);
 }
+void *worker_thread(void *_args){ /* Thread function */
+    worker_t_arguments *args = (struct worker_t_arguments *)_args ;
+    ClientList *list = args->first ;
+    CircularBuffer *buffer = args->second ;
+    long ip ;
+    short port ;
+    char *path ;
+    char *ver ;
+    buffer->get(ip,port,path,ver);
+}
 
 
-Client::Client(char *dir,short port,int worker,int buffer,short sport,char *sip)  {
+Client::Client(char *dir,short port,int worker,int buff,short sport,char *sip) : bufferSize(buff) {
     dirName = new char [strlen(dir) + 1];
     strcpy(dirName,dir);
     portNum = port ;
     workerThreads = worker ;
-    bufferSize = buffer ;
     serverPort  = sport ;
     serverIP = new char[strlen(sip) + 1];
     strcpy(serverIP,sip);
-
+    buffer = new CircularBuffer(bufferSize);
 
 }
 int Client::connectToserver(void) {

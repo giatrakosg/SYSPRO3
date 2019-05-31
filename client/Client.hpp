@@ -26,7 +26,12 @@
 #include <arpa/inet.h>
 
 #include "../include/ClientList.hpp"
+#include "CircularBuffer.hpp"
 
+struct worker_t_arguments {
+    ClientList *first ;
+    CircularBuffer *second ;
+};
 
 class Client {
 private:
@@ -34,6 +39,7 @@ private:
     long ip ; // This clients ip in long form
 
     ClientList list ;
+    CircularBuffer *buffer ;
 
     char *dirName ;
     short portNum ;
