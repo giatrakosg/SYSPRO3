@@ -7,6 +7,10 @@
 //
 
 #include "Client.hpp"
+void calculatemd5hash(char *,char *&);
+int file_exist(char *);
+
+
 void perror_exit(char *message)
 {
     perror(message);
@@ -106,7 +110,15 @@ void *worker_thread_f(void *_args){ /* Thread function */
                 for (int i = 0; i < nfiles; i++) {
                     recv(sock,path,PATH_LEN + 1,0);
                     recv(sock,ver,VER_LEN + 1,0);
-                    buffer->put(ip,port,path,HASH_PLACE_HOLDER);
+                    char clientpath[512];
+                    sprintf(clientpath,"mirror%ld%d/%s",ip,port,path);
+                    if (file_exist(clientpath)) {
+                        char *currversion ;
+                        calculatemd5hash(clientpath,currversion);
+                        buffer->put(ip,port,path,currversion);
+                    } else {
+                        buffer->put(ip,port,path,HASH_PLACE_HOLDER);
+                    }
                 }
 
             }
@@ -217,7 +229,7 @@ Client::Client(char *dir,short port,int worker,int buff,short sport,char *sip) :
 
 }
 
-void Client::calculatemd5hash(char *path,char *&hash) {
+void calculatemd5hash(char *path,char *&hash) {
     hash = new char[VER_LEN + 1];
     hash[VER_LEN] = '\0';
     unsigned char c[MD5_DIGEST_LENGTH];

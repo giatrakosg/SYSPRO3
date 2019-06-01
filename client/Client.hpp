@@ -41,7 +41,7 @@
 #include "../include/ClientList.hpp"
 #include "CircularBuffer.hpp"
 
-#define FILE_NOT_FOUND -1 
+#define FILE_NOT_FOUND -1
 #define FILE_UP_TO_DATE -2
 #define READ_BUFF_S 80
 
@@ -73,7 +73,6 @@ private:
     int send_file_list(int );
     int sendFilesInDir(char *,int );
     int send_file(int ,char *,char *);
-    void calculatemd5hash(char *,char *& );
 public:
     Client(char *,short ,int ,int ,short ,char *);
     int connectToserver(void);

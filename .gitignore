@@ -6,3 +6,4 @@ client/inet_str_server.c
 client/a.out
 server/dropbox_server
 client/common_cl_*
+client/mirror*
