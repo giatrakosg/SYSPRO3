@@ -127,7 +127,6 @@ int Client::connectToserver(void) {
     for (int i = 0; i < size; i++) {
         recv(sock,&(ips[i]),sizeof(long),0);
         recv(sock,&(ports[i]),sizeof(short),0);
-        printf("<%ld,%d>\n",ips[i],ports[i] );
         ips[i] = ntohl(ips[i]) ;
         ports[i] = ntohs(ports[i]) ;
 
@@ -137,7 +136,7 @@ int Client::connectToserver(void) {
     }
 
     //pause();
-
+    list.print();
     close(sock);                 /* Close socket and exit */
 
 
@@ -412,6 +411,8 @@ int Client::connectToserver(void) {
                 break;
               }
               printf("Received %s : <%ld,%d> \n",cmd,recvip,recvport );
+              list.addNode(recvip,recvport);
+              list.print();
           }
 
         } while(TRUE);

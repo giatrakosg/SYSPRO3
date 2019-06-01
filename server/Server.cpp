@@ -88,7 +88,6 @@ int Server::send_user_on(long sendip,short sendport,long usrip,short usrport) {
 
     struct in_addr ip_addr;
     ip_addr.s_addr = htonl(sendip);
-    printf("The IP address is %s\n", inet_ntoa(ip_addr));
 
 
     struct sockaddr_in server;
@@ -115,21 +114,25 @@ int Server::send_user_on(long sendip,short sendport,long usrip,short usrport) {
     write(sock,cmd_user_on,17);
     write(sock,&usrip,sizeof(long));
     write(sock,&usrport,sizeof(short));
-    sleep(2);
     close(sock);                 /* Close socket and exit */
     return 0 ;
 
 
 }
 int Server::send_client_list(int socketfd) {
+    long netip ;
+    short netport ;
+
     char cmd_client_list[17] ;
     strcpy(cmd_client_list,"CLIENT_LIST     ");
     write(socketfd,cmd_client_list,17);
     write(socketfd,&(list.size),sizeof(int));
     struct Node *ind = list.head ;
     while(ind != NULL) {
-        write(socketfd,&(ind->ip),sizeof(long));
-        write(socketfd,&(ind->port),sizeof(short));
+        netip = htonl(ind->ip);
+        netport = htons(ind->port);
+        write(socketfd,&netip,sizeof(long));
+        write(socketfd,&netport,sizeof(short));
         ind = ind->next ;
     }
     return 0 ;
