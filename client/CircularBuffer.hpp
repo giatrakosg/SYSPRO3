@@ -16,7 +16,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define PATH_LEN 512
+#define PATH_LEN 128
 #define VER_LEN 32
 
 

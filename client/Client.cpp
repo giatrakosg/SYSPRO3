@@ -24,7 +24,6 @@ void *worker_thread_f(void *_args){ /* Thread function */
         buffer->get(ip,port,path,ver);
         printf("Thread %d : Retrieved %ld %d %s %s\n",pthread_self(),ip,port,path,ver );
         if ((path == NULL) || (ver == NULL)) {
-            printf("Running GET_FILE_LIST code\n");
             sleep(2);
             int             sock;
 
@@ -54,6 +53,21 @@ void *worker_thread_f(void *_args){ /* Thread function */
             char cmd_user_on[17] ;
             strcpy(cmd_user_on,"GET_FILE_LIST   ");
             write(sock,cmd_user_on,17);
+            char cmd_recv[17];
+            int nfiles ;
+            recv(sock,cmd_recv,17,0);
+            if (strcmp(cmd_recv,"FILE_LIST       ") == 0) {
+                long nfiles ;
+                recv(sock,&nfiles,sizeof(long),0);
+                nfiles = ntohl(nfiles);
+                char path[129];
+                for (int i = 0; i < nfiles; i++) {
+                    recv(sock,path,129,0);
+                    printf("[%d/%d] : %s\n",i,nfiles,path );
+                }
+
+            }
+
             close(sock);                 /* Close socket and exit */
 
         }
@@ -74,7 +88,9 @@ Client::Client(char *dir,short port,int worker,int buff,short sport,char *sip) :
     buffer = new CircularBuffer(bufferSize);
 
 }
-int sendFilesInDir(char *dirpath) {
+
+int Client::countFiles(char *dirpath) {
+    int sum = 0 ;
     DIR * dir = opendir(dirpath);
     if (dir == NULL) {
         fprintf(stderr, "NULL dir\n");
@@ -100,20 +116,63 @@ int sendFilesInDir(char *dirpath) {
         if(!S_ISREG(path_stat.st_mode)) {
             char path[512] ;
             sprintf(path,"%s/%s",dirpath,ind->d_name);
-            sendFilesInDir(totalpath);
+            sum += countFiles(totalpath);
             continue ;
         }
-        fprintf(stdout,"Path : %s\n",totalpath );
+        sum += 1;
+    }
+    closedir(dir);
+    return sum ;
+
+}
+
+int Client::sendFilesInDir(char *dirpath,int sockfd) {
+    DIR * dir = opendir(dirpath);
+    if (dir == NULL) {
+        fprintf(stderr, "NULL dir\n");
+    }
+    //fprintf(logF,"Dirpath sendFilesInDir : %s \n",dirpath);
+    struct dirent *ind ;
+    while((ind = readdir(dir)) != NULL) {
+        //fprintf(stdout,"Dirpath : %s\n",ind->d_name );
+        fflush(stdout);
+        // We check if it is a dir or a regular file
+        // This code snippet was taken from
+        // https://stackoverflow.com/questions/4553012/checking-if-a-file-is-a-directory-or-just-a-file
+        struct stat path_stat;
+        char totalpath[512];
+        sprintf(totalpath,"%s/%s",dirpath,ind->d_name);
+        stat(totalpath, &path_stat);
+
+        // Ignore . , .. directories
+        if ((strcmp(ind->d_name,"..") == 0) || (strcmp(ind->d_name,".") == 0)) {
+            continue ;
+        }
+        // This is a directory
+        if(!S_ISREG(path_stat.st_mode)) {
+            char path[512] ;
+            sprintf(path,"%s/%s",dirpath,ind->d_name);
+            sendFilesInDir(totalpath,sockfd);
+            continue ;
+        }
+        //fprintf(stdout,"Path : %s\n",totalpath );
         //fflush(logF);
         // We check if it
-        //sendFile(dirpath,ind->d_name);
+        char outpath[129];
+        strcpy(outpath,totalpath);
+        send(sockfd,outpath,129,0);
     }
     closedir(dir);
     return 0 ;
 
 }
 int Client::send_file_list(int sockfd) {
-    sendFilesInDir(dirName);
+    char *cmd_file_list = "FILE_LIST       ";
+    long nfiles = countFiles(dirName);
+    nfiles = htonl(nfiles);
+    send(sockfd,cmd_file_list,17,0);
+    send(sockfd,&nfiles,sizeof(long),0);
+    sendFilesInDir(dirName,sockfd);
 }
 int Client::connectToserver(void) {
     srand(time(NULL));
