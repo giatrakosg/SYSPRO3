@@ -41,10 +41,13 @@
 #include "../include/ClientList.hpp"
 #include "CircularBuffer.hpp"
 
+#define FILE_NOT_FOUND -1 ;
+#define FILE_UP_TO_DATE -2 ;
 
 #define TRUE             1
 #define FALSE            0
 
+#define HASH_PLACE_HOLDER "00000000000000000000000000000000"
 
 struct worker_t_arguments {
     ClientList *first ;
@@ -68,6 +71,7 @@ private:
     int countFiles(char *);
     int send_file_list(int );
     int sendFilesInDir(char *,int );
+    int send_file(int ,char *,char *);
     void calculatemd5hash(char *,char *& );
 public:
     Client(char *,short ,int ,int ,short ,char *);

@@ -12,6 +12,44 @@ void perror_exit(char *message)
     perror(message);
     exit(EXIT_FAILURE);
 }
+int mkdir_p(const char *path)
+{
+    /* Adapted from http://stackoverflow.com/a/2336245/119527 */
+    const size_t len = strlen(path);
+    char _path[PATH_MAX];
+    char *p;
+
+    errno = 0;
+
+    /* Copy string so its mutable */
+    if (len > sizeof(_path)-1) {
+        errno = ENAMETOOLONG;
+        return -1;
+    }
+    strcpy(_path, path);
+
+    /* Iterate the string */
+    for (p = _path + 1; *p; p++) {
+        if (*p == '/') {
+            /* Temporarily truncate */
+            *p = '\0';
+
+            if (mkdir(_path, S_IRWXU) != 0) {}
+
+            *p = '/';
+        }
+    }
+
+    if (mkdir(_path, S_IRWXU) != 0) {
+        if (errno != EEXIST)
+            return -1;
+    }
+
+    return 0;
+}
+
+
+
 void *worker_thread_f(void *_args){ /* Thread function */
     worker_t_arguments *args = (struct worker_t_arguments *)_args ;
     ClientList *list = args->first ;
@@ -65,7 +103,7 @@ void *worker_thread_f(void *_args){ /* Thread function */
                 for (int i = 0; i < nfiles; i++) {
                     recv(sock,path,PATH_LEN + 1,0);
                     recv(sock,ver,VER_LEN + 1,0);
-                    buffer->put(ip,port,path,ver);
+                    buffer->put(ip,port,path,HASH_PLACE_HOLDER);
                 }
 
             }
@@ -255,6 +293,16 @@ int Client::sendFilesInDir(char *dirpath,int sockfd) {
     return 0 ;
 
 }
+// Found at
+// https://stackoverflow.com/questions/230062/whats-the-best-way-to-check-if-a-file-exists-in-c
+int file_exist (char *filename)
+{
+  struct stat   buffer;
+  char totalpath[512];
+  sprintf(totalpath,"./%s",filename);
+  return (stat (totalpath, &buffer) == 0);
+}
+
 int Client::send_file_list(int sockfd) {
     char *cmd_file_list = "FILE_LIST       ";
     long nfiles = countFiles(dirName);
@@ -262,6 +310,38 @@ int Client::send_file_list(int sockfd) {
     send(sockfd,cmd_file_list,17,0);
     send(sockfd,&nfiles,sizeof(long),0);
     sendFilesInDir(dirName,sockfd);
+}
+int Client::send_file(int sockfd,char *path,char *version) {
+
+    if (!file_exist(path))
+    {
+        char cmd_file_not_found[17];
+        strcpy(cmd_file_not_found,"FILE_NOT_FOUND  ");
+        send(sockfd,cmd_file_not_found,17,0);
+        return FILE_NOT_FOUND ;
+    }
+    char *currversion ;
+    calculatemd5hash(path,currversion);
+    if (strcmp(currversion,version) == 0) {
+        char cmd_file_up_to_date[17];
+        strcpy(cmd_file_up_to_date,"FILE_UP_TO_DATE ");
+        send(sockfd,cmd_file_up_to_date,17,0);
+        return FILE_UP_TO_DATE ;
+
+    }
+    char cmd_file_size[17];
+    strcpy(cmd_file_size,"FILE_SIZE       ");
+    send(sockfd,cmd_file_size,17,0);
+    send(sockfd,currversion,VER_LEN + 1,0);
+    long size ;
+    size = 2000 ;
+    size = htonl(size);
+    send(sockfd,&size,sizeof(long),0);
+    return 0 ;
+
+
+
+
 }
 int Client::connectToserver(void) {
     srand(time(NULL));
@@ -638,6 +718,12 @@ int Client::connectToserver(void) {
               buffer->put(recvip,recvport,NULL,NULL);
           } else if (strcmp(cmd,"GET_FILE_LIST   ") == 0) {
               send_file_list(fds[i].fd);
+          } else if (strcmp(cmd,"GET_FILE        ") == 0) {
+              char filepath[PATH_LEN + 1];
+              char fileversion[VER_LEN + 1];
+              recv(fds[i].fd,filepath,PATH_LEN+1,0);
+              recv(fds[i].fd,fileversion,VER_LEN+1,0);
+              send_file(fds[i].fd,filepath,fileversion);
           }
 
         } while(TRUE);
