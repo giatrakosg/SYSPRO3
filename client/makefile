@@ -2,9 +2,9 @@
 #
 
 OBJS 	=  main.o Client.o CircularBuffer.o
-SOURCE	= main.cpp inet_str_client.c Client.cpp CircularBuffer.cpp
+SOURCE	= main.cpp Client.cpp CircularBuffer.cpp
 HEADER  = Client.hpp CircularBuffer.hpp
-OUT  	= dropbox_client test_client
+OUT  	= dropbox_client
 CC	= g++
 FLAGS   = -g -c -pedantic -ansi  -Wall -Wextra -Wno-missing-field-initializers \
 -Wno-unused-parameter -lpthread
@@ -13,8 +13,6 @@ FLAGS   = -g -c -pedantic -ansi  -Wall -Wextra -Wno-missing-field-initializers \
 
 
 # create/compile the individual files >>separately<<
-test_client : inet_str_client.c
-	$(CC) inet_str_client.c -o test_client
 dropbox_client : main.o Client.o CircularBuffer.o
 	$(CC) main.o Client.o CircularBuffer.o -o dropbox_client -lpthread
 main.o : main.cpp
@@ -26,7 +24,7 @@ CircularBuffer.o : CircularBuffer.cpp
 
 
 # clean house
-all : dropbox_client test_client
+all : dropbox_client
 clean:
 	rm -f $(OBJS) $(OUT) ; rm -r common_cl_*
 

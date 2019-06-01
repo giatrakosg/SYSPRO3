@@ -40,8 +40,46 @@ Client::Client(char *dir,short port,int worker,int buff,short sport,char *sip) :
     buffer = new CircularBuffer(bufferSize);
 
 }
+int sendFilesInDir(char *dirpath) {
+    DIR * dir = opendir(dirpath);
+    if (dir == NULL) {
+        fprintf(stderr, "NULL dir\n");
+    }
+    //fprintf(logF,"Dirpath sendFilesInDir : %s \n",dirpath);
+    struct dirent *ind ;
+    while((ind = readdir(dir)) != NULL) {
+        //fprintf(stdout,"Dirpath : %s\n",ind->d_name );
+        fflush(stdout);
+        // We check if it is a dir or a regular file
+        // This code snippet was taken from
+        // https://stackoverflow.com/questions/4553012/checking-if-a-file-is-a-directory-or-just-a-file
+        struct stat path_stat;
+        char totalpath[512];
+        sprintf(totalpath,"%s/%s",dirpath,ind->d_name);
+        stat(totalpath, &path_stat);
+
+        // Ignore . , .. directories
+        if ((strcmp(ind->d_name,"..") == 0) || (strcmp(ind->d_name,".") == 0)) {
+            continue ;
+        }
+        // This is a directory
+        if(!S_ISREG(path_stat.st_mode)) {
+            char path[512] ;
+            sprintf(path,"%s/%s",dirpath,ind->d_name);
+            sendFilesInDir(totalpath);
+            continue ;
+        }
+        fprintf(stdout,"Path : %s\n",totalpath );
+        //fflush(logF);
+        // We check if it
+        //sendFile(dirpath,ind->d_name);
+    }
+    closedir(dir);
+    return 0 ;
+
+}
 int Client::send_file_list(int sockfd) {
-    
+    sendFilesInDir(dirName);
 }
 int Client::connectToserver(void) {
     srand(time(NULL));

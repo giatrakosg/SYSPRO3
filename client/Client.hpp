@@ -27,6 +27,14 @@
 #include <arpa/inet.h>
 #include <sys/ioctl.h>
 #include <sys/poll.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <signal.h>
+#include <libgen.h>
+#include <dirent.h>
+#include <stdint.h>
+#include <sys/file.h>
 
 
 #include "../include/ClientList.hpp"
