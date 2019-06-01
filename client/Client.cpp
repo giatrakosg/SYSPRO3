@@ -20,7 +20,12 @@ void *worker_thread_f(void *_args){ /* Thread function */
     short port ;
     char *path ;
     char *ver ;
-    buffer->get(ip,port,path,ver);
+    while (1) {
+        buffer->get(ip,port,path,ver);
+        printf("Thread %d : Retrieved %ld %d %s %s\n",pthread_self(),ip,port,path,ver );
+        delete path ;
+        delete ver ;
+    }
 }
 
 
@@ -36,6 +41,7 @@ Client::Client(char *dir,short port,int worker,int buff,short sport,char *sip) :
 
 }
 int Client::connectToserver(void) {
+    srand(time(NULL));
     int             port, sock, i;
     char            buf[256] = { '\0' };
 
@@ -104,15 +110,6 @@ int Client::connectToserver(void) {
     long *ips = new long[size];
     short *ports = new short[size];
 
-    for (int i = 0; i < size; i++) {
-        recv(sock,&(ips[i]),sizeof(long),0);
-        recv(sock,&(ports[i]),sizeof(short),0);
-        ips[i] = ntohl(ips[i]) ;
-        ports[i] = ntohs(ports[i]) ;
-
-        // Add the data on our clientlist
-        list.addNode(ips[i],ports[i]);
-    }
     //char cmd_log_off[17] ;
     //strcpy(cmd_log_off,"LOG_OFF         ");
     //send(sock,cmd_log_off,17,0);
@@ -127,7 +124,21 @@ int Client::connectToserver(void) {
             perror2("pthread_create", err); exit(1);
             }
     }
+    for (int i = 0; i < 50; i++) {
+        buffer->put(rand() % LONG_MAX,rand() % SHRT_MAX,"/this/path","aaavdss") ;
+    }
+    for (int i = 0; i < size; i++) {
+        recv(sock,&(ips[i]),sizeof(long),0);
+        recv(sock,&(ports[i]),sizeof(short),0);
+        ips[i] = ntohl(ips[i]) ;
+        ports[i] = ntohs(ports[i]) ;
 
+        // Add the data on our clientlist
+        list.addNode(ips[i],ports[i]);
+        //buffer->put(ips[i],ports[i],NULL,NULL);
+    }
+
+    //pause();
 
     close(sock);                 /* Close socket and exit */
 

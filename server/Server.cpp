@@ -51,7 +51,7 @@ int Server::first_connection(int sock_fd) {
     // Send user_on command to each client
     struct Node *ind = list.head ;
     while (ind != NULL) {
-        send_user_on(ind->ip,ind->port,ip,port);
+        //send_user_on(ind->ip,ind->port,ip,port);
         ind = ind->next;
     }
 
