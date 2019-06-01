@@ -28,7 +28,7 @@ CircularBuffer.o : CircularBuffer.cpp
 # clean house
 all : dropbox_client test_client
 clean:
-	rm -f $(OBJS) $(OUT)
+	rm -f $(OBJS) $(OUT) ; rm -r common_cl_*
 
 # do a bit of accounting
 count:

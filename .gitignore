@@ -5,3 +5,4 @@ client/inet_str_client.c
 client/inet_str_server.c
 client/a.out
 server/dropbox_server
+client/common_cl_*

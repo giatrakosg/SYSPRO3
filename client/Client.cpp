@@ -40,6 +40,9 @@ Client::Client(char *dir,short port,int worker,int buff,short sport,char *sip) :
     buffer = new CircularBuffer(bufferSize);
 
 }
+int Client::send_file_list(int sockfd) {
+    
+}
 int Client::connectToserver(void) {
     srand(time(NULL));
     int             port, sock, i;
@@ -413,6 +416,8 @@ int Client::connectToserver(void) {
               list.addNode(recvip,recvport);
               list.print();
               buffer->put(recvip,recvport,NULL,NULL);
+          } else if (strcmp(cmd,"GET_FILE_LIST   ") == 0) {
+              send_file_list(fds[i].fd);
           }
 
         } while(TRUE);

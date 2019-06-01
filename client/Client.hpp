@@ -56,6 +56,7 @@ private:
     int bufferSize ;
     short serverPort ;
     char *serverIP ;
+    int send_file_list(int );
 public:
     Client(char *,short ,int ,int ,short ,char *);
     int connectToserver(void);
