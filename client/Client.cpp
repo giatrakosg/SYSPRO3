@@ -23,7 +23,7 @@ void *worker_thread_f(void *_args){ /* Thread function */
     while (1) {
         buffer->get(ip,port,path,ver);
         printf("Thread %d : Retrieved %ld %d %s %s\n",pthread_self(),ip,port,path,ver );
-
+        // The item is not a file so we send a GET_FILE_LIST request
         if ((path == NULL) || (ver == NULL)) {
             sleep(2);
             int             sock;
@@ -66,12 +66,65 @@ void *worker_thread_f(void *_args){ /* Thread function */
                     recv(sock,path,PATH_LEN + 1,0);
                     recv(sock,ver,VER_LEN + 1,0);
                     buffer->put(ip,port,path,ver);
-                    //printf("[%d/%d] : %s | %s\n",i,nfiles,path,ver );
                 }
 
             }
 
             close(sock);                 /* Close socket and exit */
+
+        }
+        // The item is a reference to a file
+        else {
+            int             sock;
+
+            struct in_addr ip_addr;
+            ip_addr.s_addr = htonl(ip);
+
+
+            struct sockaddr_in server;
+            struct sockaddr *serverptr = (struct sockaddr*)&server;
+            struct hostent *rem;
+
+
+        	/* Create socket */
+            if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+            	perror_exit("socket");
+        	/* Find server address */
+            if ((rem = gethostbyname(inet_ntoa(ip_addr))) == NULL) {
+        	   herror("gethostbyname"); exit(1);
+            }
+
+            server.sin_family = AF_INET;       /* Internet domain */
+            memcpy(&server.sin_addr, rem->h_addr, rem->h_length);
+            server.sin_port = htons(port);         /* Server port */
+            /* Initiate connection */
+            if (connect(sock, serverptr, sizeof(server)) < 0)
+        	   perror_exit("connect");
+            char cmd_get_file[17] ;
+            strcpy(cmd_get_file,"GET_FILE        ");
+            send(sock,cmd_get_file,17,0);
+            send(sock,path,PATH_LEN + 1,0);
+            send(sock,ver,VER_LEN + 1,0);
+
+            char cmd_recv[17];
+            recv(sock,cmd_recv,17,0);
+            if (strcmp(cmd_recv,"FILE_NOT_FOUND  ") == 0) {
+                fprintf(stderr, "Error file not found \n");
+            }
+            else if (strcmp(cmd_recv,"FILE_UP_TO_DATE ") == 0) {
+                fprintf(stderr, "File up to date\n");
+            }
+            else if (strcmp(cmd_recv,"FILE_SIZE       ") == 0) {
+                char newversion[VER_LEN + 1];
+                long size ;
+                recv(sock,newversion,VER_LEN + 1,0);
+                recv(sock,&size,sizeof(long),0);
+                size = ntohl(size);
+                printf("ver %s | size %ld \n",newversion,size );
+            }
+
+            close(sock);                 /* Close socket and exit */
+
 
         }
 
