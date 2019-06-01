@@ -35,6 +35,7 @@
 #include <dirent.h>
 #include <stdint.h>
 #include <sys/file.h>
+#include <openssl/md5.h>
 
 
 #include "../include/ClientList.hpp"
@@ -67,6 +68,7 @@ private:
     int countFiles(char *);
     int send_file_list(int );
     int sendFilesInDir(char *,int );
+    void calculatemd5hash(char *,char *& );
 public:
     Client(char *,short ,int ,int ,short ,char *);
     int connectToserver(void);

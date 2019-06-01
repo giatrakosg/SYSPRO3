@@ -54,16 +54,18 @@ void *worker_thread_f(void *_args){ /* Thread function */
             strcpy(cmd_user_on,"GET_FILE_LIST   ");
             write(sock,cmd_user_on,17);
             char cmd_recv[17];
-            int nfiles ;
             recv(sock,cmd_recv,17,0);
             if (strcmp(cmd_recv,"FILE_LIST       ") == 0) {
                 long nfiles ;
                 recv(sock,&nfiles,sizeof(long),0);
                 nfiles = ntohl(nfiles);
-                char path[129];
+                char path[PATH_LEN + 1];
+                char ver[VER_LEN + 1];
                 for (int i = 0; i < nfiles; i++) {
-                    recv(sock,path,129,0);
-                    printf("[%d/%d] : %s\n",i,nfiles,path );
+                    recv(sock,path,PATH_LEN + 1,0);
+                    recv(sock,ver,VER_LEN + 1,0);
+
+                    printf("[%d/%d] : %s | %s\n",i,nfiles,path,ver );
                 }
 
             }
@@ -88,6 +90,35 @@ Client::Client(char *dir,short port,int worker,int buff,short sport,char *sip) :
     buffer = new CircularBuffer(bufferSize);
 
 }
+
+void Client::calculatemd5hash(char *path,char *&hash) {
+    hash = new char[VER_LEN + 1];
+    hash[VER_LEN] = '\0';
+    unsigned char c[MD5_DIGEST_LENGTH];
+    int i;
+    FILE *inFile = fopen (path, "rb");
+    MD5_CTX mdContext;
+    int bytes;
+    unsigned char data[1024];
+
+    if (inFile == NULL) {
+        printf ("%s can't be opened.\n", path);
+        return ;
+    }
+
+    MD5_Init (&mdContext);
+    while ((bytes = fread (data, 1, 1024, inFile)) != 0)
+        MD5_Update (&mdContext, data, bytes);
+    MD5_Final (c,&mdContext);
+    for(int i = 0; i < 16; ++i)
+    sprintf(&hash[i*2], "%02x", (unsigned int)c[i]);
+
+    //for(i = 0; i < MD5_DIGEST_LENGTH; i++) sprintf("%02x", c[i]);
+    fclose (inFile);
+
+}
+
+
 
 int Client::countFiles(char *dirpath) {
     int sum = 0 ;
@@ -159,8 +190,11 @@ int Client::sendFilesInDir(char *dirpath,int sockfd) {
         //fflush(logF);
         // We check if it
         char outpath[129];
+        char *hash ;
         strcpy(outpath,totalpath);
-        send(sockfd,outpath,129,0);
+        calculatemd5hash(totalpath,hash);
+        send(sockfd,outpath,PATH_LEN + 1,0);
+        send(sockfd,hash,VER_LEN + 1,0);
     }
     closedir(dir);
     return 0 ;

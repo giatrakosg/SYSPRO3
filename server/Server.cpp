@@ -58,7 +58,6 @@ int Server::first_connection(int sock_fd) {
     // Store in network order
     ip = ntohl(ip);
     port = ntohs(port);
-    list.addNode(ip,port);
 
     // Receive get_clients command over same connection
     while(1) {
@@ -79,6 +78,8 @@ int Server::first_connection(int sock_fd) {
     strcpy(cmd,buffer);
     if (strcmp(cmd,"GET_CLIENTS     ") == 0) {
         send_client_list(sock_fd);
+        list.addNode(ip,port);
+
     }
     return 0 ;
 
