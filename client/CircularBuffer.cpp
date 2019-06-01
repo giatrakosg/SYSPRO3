@@ -62,14 +62,16 @@ int CircularBuffer::get(long &outip,short &outport,char *&outpath,char *&outver)
         if(data[tail]->pathname == NULL) {
             outpath = NULL ;
         } else {
-            outpath = new char[512];
+            outpath = new char[PATH_LEN + 1];
             strcpy(outpath,data[tail]->pathname);
+            outpath[PATH_LEN] = '\0';
         }
         if(data[tail]->version == NULL) {
             outver = NULL ;
         } else {
-            outver = new char[32];
-            strcpy(outpath,data[tail]->version);
+            outver = new char[VER_LEN + 1];
+            strcpy(outver,data[tail]->version);
+            outver[VER_LEN] = '\0' ;
         }
         curr--;
         delete data[tail];

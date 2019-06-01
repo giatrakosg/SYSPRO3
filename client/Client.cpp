@@ -23,6 +23,7 @@ void *worker_thread_f(void *_args){ /* Thread function */
     while (1) {
         buffer->get(ip,port,path,ver);
         printf("Thread %d : Retrieved %ld %d %s %s\n",pthread_self(),ip,port,path,ver );
+
         if ((path == NULL) || (ver == NULL)) {
             sleep(2);
             int             sock;
@@ -64,8 +65,8 @@ void *worker_thread_f(void *_args){ /* Thread function */
                 for (int i = 0; i < nfiles; i++) {
                     recv(sock,path,PATH_LEN + 1,0);
                     recv(sock,ver,VER_LEN + 1,0);
-
-                    printf("[%d/%d] : %s | %s\n",i,nfiles,path,ver );
+                    buffer->put(ip,port,path,ver);
+                    //printf("[%d/%d] : %s | %s\n",i,nfiles,path,ver );
                 }
 
             }
@@ -73,6 +74,7 @@ void *worker_thread_f(void *_args){ /* Thread function */
             close(sock);                 /* Close socket and exit */
 
         }
+
         delete path ;
         delete ver ;
     }
