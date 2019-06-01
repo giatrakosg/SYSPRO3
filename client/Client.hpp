@@ -25,9 +25,17 @@
 #include <errno.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <sys/ioctl.h>
+#include <sys/poll.h>
+
 
 #include "../include/ClientList.hpp"
 #include "CircularBuffer.hpp"
+
+
+#define TRUE             1
+#define FALSE            0
+
 
 struct worker_t_arguments {
     ClientList *first ;
