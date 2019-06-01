@@ -18,11 +18,45 @@ void *worker_thread_f(void *_args){ /* Thread function */
     CircularBuffer *buffer = args->second ;
     long ip ;
     short port ;
-    char *path ;
-    char *ver ;
+    char *path = NULL;
+    char *ver = NULL;
     while (1) {
         buffer->get(ip,port,path,ver);
         printf("Thread %d : Retrieved %ld %d %s %s\n",pthread_self(),ip,port,path,ver );
+        if ((path == NULL) || (ver == NULL)) {
+            printf("Running GET_FILE_LIST code\n");
+            sleep(2);
+            int             sock;
+
+            struct in_addr ip_addr;
+            ip_addr.s_addr = htonl(ip);
+
+
+            struct sockaddr_in server;
+            struct sockaddr *serverptr = (struct sockaddr*)&server;
+            struct hostent *rem;
+
+
+        	/* Create socket */
+            if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+            	perror_exit("socket");
+        	/* Find server address */
+            if ((rem = gethostbyname(inet_ntoa(ip_addr))) == NULL) {
+        	   herror("gethostbyname"); exit(1);
+            }
+
+            server.sin_family = AF_INET;       /* Internet domain */
+            memcpy(&server.sin_addr, rem->h_addr, rem->h_length);
+            server.sin_port = htons(port);         /* Server port */
+            /* Initiate connection */
+            if (connect(sock, serverptr, sizeof(server)) < 0)
+        	   perror_exit("connect");
+            char cmd_user_on[17] ;
+            strcpy(cmd_user_on,"GET_FILE_LIST   ");
+            write(sock,cmd_user_on,17);
+            close(sock);                 /* Close socket and exit */
+
+        }
         delete path ;
         delete ver ;
     }

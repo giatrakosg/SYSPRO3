@@ -9,10 +9,16 @@
 #include "CircularBuffer.hpp"
 CBNode::CBNode(long ip,short port,char *path,char *ver) : ip(ip) , port(port) {
     if (path != NULL) {
+        pathname = new char[PATH_LEN + 1];
         strcpy(pathname,path);
+    } else {
+        pathname = NULL ;
     }
     if (ver != NULL) {
+        version = new char[VER_LEN + 1];
         strcpy(version,ver);
+    } else {
+        version = NULL ;
     }
 }
 
@@ -53,10 +59,18 @@ int CircularBuffer::get(long &outip,short &outport,char *&outpath,char *&outver)
     }
         outip = data[tail]->ip ;
         outport = data[tail]->port ;
-        outpath = new char[512];
-        strcpy(outpath,data[tail]->pathname);
-        outver = new char[32];
-        strcpy(outver,data[tail]->version);
+        if(data[tail]->pathname == NULL) {
+            outpath = NULL ;
+        } else {
+            outpath = new char[512];
+            strcpy(outpath,data[tail]->pathname);
+        }
+        if(data[tail]->version == NULL) {
+            outver = NULL ;
+        } else {
+            outver = new char[32];
+            strcpy(outpath,data[tail]->version);
+        }
         curr--;
         delete data[tail];
         data[tail] = NULL ;

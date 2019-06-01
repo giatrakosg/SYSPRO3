@@ -16,11 +16,15 @@
 #include <string.h>
 #include <stdlib.h>
 
+#define PATH_LEN 512
+#define VER_LEN 32
+
+
 struct CBNode {
     long  ip            ;
     short port          ;
-    char  pathname[512] ;
-    char  version[32]   ;
+    char  *pathname ;
+    char  *version   ;
     CBNode(long ,short ,char *,char *);
 };
 
