@@ -12,6 +12,9 @@ void perror_exit(char *message)
     perror(message);
     exit(EXIT_FAILURE);
 }
+
+
+// Removes the file name from a path
 int mkdir_p(const char *path)
 {
     /* Adapted from http://stackoverflow.com/a/2336245/119527 */
@@ -158,7 +161,37 @@ void *worker_thread_f(void *_args){ /* Thread function */
                 recv(sock,newversion,VER_LEN + 1,0);
                 recv(sock,&size,sizeof(long),0);
                 size = ntohl(size);
-                printf("ver %s | size %ld \n",newversion,size );
+                char clientpath[512];
+                sprintf(clientpath,"mirror%ld%d/%s",ip,port,path);
+                // needed because dirname modifies input
+                char clientpath2[512];
+                strcpy(clientpath2,clientpath);
+                mkdir_p(dirname(clientpath2));
+                FILE * outD = fopen(clientpath,"w+");
+                int read_bytes ;
+                if (outD != NULL) {
+                    char *contents = new char[size];
+                    memset(contents,'\0',size);
+                    // We wait until the client has send all the data
+                    //sleep(2);
+                    int counter = size ;
+                    while (counter > 0) {
+                        char *readBuffer = new char[READ_BUFF_S +1]; // We use a buffer to
+                        // read over the pipe
+                        memset(readBuffer,'\0',READ_BUFF_S+1);
+                        read_bytes = recv(sock,readBuffer,READ_BUFF_S ,0);
+                        strcat(contents,readBuffer);
+                        counter -= read_bytes ;
+                        delete readBuffer;
+                    }
+                    fwrite(contents,sizeof(char),size,outD);
+                    fclose(outD);
+                    delete contents ;
+
+                } else {
+                    perror("fopen");
+                }
+
             }
 
             close(sock);                 /* Close socket and exit */
@@ -250,6 +283,7 @@ int Client::countFiles(char *dirpath) {
 
 }
 
+
 int Client::sendFilesInDir(char *dirpath,int sockfd) {
     DIR * dir = opendir(dirpath);
     if (dir == NULL) {
@@ -302,7 +336,12 @@ int file_exist (char *filename)
   sprintf(totalpath,"./%s",filename);
   return (stat (totalpath, &buffer) == 0);
 }
-
+int file_size(char *filename) {
+    struct stat st;
+    stat(filename, &st);
+    int size = st.st_size;
+    return size ;
+}
 int Client::send_file_list(int sockfd) {
     char *cmd_file_list = "FILE_LIST       ";
     long nfiles = countFiles(dirName);
@@ -333,10 +372,28 @@ int Client::send_file(int sockfd,char *path,char *version) {
     strcpy(cmd_file_size,"FILE_SIZE       ");
     send(sockfd,cmd_file_size,17,0);
     send(sockfd,currversion,VER_LEN + 1,0);
-    long size ;
-    size = 2000 ;
+    long size = file_size(path);
     size = htonl(size);
     send(sockfd,&size,sizeof(long),0);
+    // Found at https://stackoverflow.com/questions/174531/how-to-read-the-content-of-a-file-to-a-string-in-c
+    int fd = open(path,O_RDONLY);
+    if (fd < -1) {
+        perror("open");
+        return -1 ;
+    }
+    int count = ntohl(size) ;
+    while(count > 0) {
+        char *contents = new char[READ_BUFF_S+1];
+        memset(contents,'\0',READ_BUFF_S+1);
+        read(fd,contents,READ_BUFF_S);
+        int err = send(sockfd,contents,READ_BUFF_S,0);
+        if (err < 0) {
+            perror("send");
+        }
+        count -= READ_BUFF_S ;
+        delete contents ;
+    }
+    close(fd) ;
     return 0 ;
 
 

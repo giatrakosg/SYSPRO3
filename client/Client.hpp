@@ -41,8 +41,9 @@
 #include "../include/ClientList.hpp"
 #include "CircularBuffer.hpp"
 
-#define FILE_NOT_FOUND -1 ;
-#define FILE_UP_TO_DATE -2 ;
+#define FILE_NOT_FOUND -1 
+#define FILE_UP_TO_DATE -2
+#define READ_BUFF_S 80
 
 #define TRUE             1
 #define FALSE            0
