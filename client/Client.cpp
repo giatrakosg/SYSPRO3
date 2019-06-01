@@ -132,7 +132,7 @@ int Client::connectToserver(void) {
 
         // Add the data on our clientlist
         list.addNode(ips[i],ports[i]);
-        //buffer->put(ips[i],ports[i],NULL,NULL);
+        buffer->put(ips[i],ports[i],NULL,NULL);
     }
 
     //pause();
@@ -144,7 +144,6 @@ int Client::connectToserver(void) {
     int    listen_sd = -1, new_sd = -1;
     int    desc_ready, end_server = FALSE, compress_array = FALSE;
     int    close_conn;
-    char   buffer[80];
     struct sockaddr_in6   addr;
     int    timeout;
     struct pollfd fds[200];
@@ -413,6 +412,7 @@ int Client::connectToserver(void) {
               printf("Received %s : <%ld,%d> \n",cmd,recvip,recvport );
               list.addNode(recvip,recvport);
               list.print();
+              buffer->put(recvip,recvport,NULL,NULL);
           }
 
         } while(TRUE);
