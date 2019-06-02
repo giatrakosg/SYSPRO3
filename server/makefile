@@ -3,7 +3,7 @@
 
 OBJS 	=  main.o Server.o
 SOURCE	= main.cpp Server.cpp
-HEADER  = Server.hpp ClientList.hpp
+HEADER  = Server.hpp 
 OUT  	= dropbox_server
 CC	= g++
 FLAGS   = -g -c -pedantic -ansi  -Wall -Wextra -Wno-missing-field-initializers -Wno-write-strings \

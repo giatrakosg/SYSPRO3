@@ -86,12 +86,9 @@ int CircularBuffer::get(long &outip,short &outport,char *&outpath,char *&outver)
 CircularBuffer::~CircularBuffer() {
     printf("Deleting Circular Buffer %d\n",length);
     for (int i = 0; i < length; i++) {
-        printf("%d\n",i );
         delete data[i];
     }
-    //isempty.isempty.__data.__wrefs = 0;
     pthread_cond_destroy(&isempty);
-    //isfull.isfull.__data.__wrefs = 0;
     pthread_cond_destroy(&isfull);
     pthread_mutex_destroy(&mtx);
     delete data ;

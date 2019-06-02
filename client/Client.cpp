@@ -334,6 +334,7 @@ int Client::sendFilesInDir(char *dirpath,int sockfd) {
         calculatemd5hash(totalpath,hash);
         send(sockfd,outpath,PATH_LEN + 1,0);
         send(sockfd,hash,VER_LEN + 1,0);
+        delete hash ;
     }
     closedir(dir);
     return 0 ;
@@ -384,6 +385,7 @@ int Client::send_file(int sockfd,char *path,char *version) {
     strcpy(cmd_file_size,"FILE_SIZE       ");
     send(sockfd,cmd_file_size,17,0);
     send(sockfd,currversion,VER_LEN + 1,0);
+    delete currversion ;
     long size = file_size(path);
     size = htonl(size);
     send(sockfd,&size,sizeof(long),0);
