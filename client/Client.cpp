@@ -484,9 +484,6 @@ int Client::connectToserver(void) {
     long *ips = new long[size];
     short *ports = new short[size];
 
-    //char cmd_log_off[17] ;
-    //strcpy(cmd_log_off,"LOG_OFF         ");
-    //send(sock,cmd_log_off,17,0);
     struct worker_t_arguments *args = new struct worker_t_arguments ;
     args->first = &list ;
     args->second = buffer ;
@@ -864,10 +861,23 @@ Client::~Client() {
     struct sockaddr_in server;
     struct sockaddr *serverptr = (struct sockaddr*)&server;
     struct hostent *rem;
+
+
+
 	/* Create socket */
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     	perror_exit("socket");
 	/* Find server address */
+
+    struct sockaddr_in6   addr;
+    memset(&addr, 0, sizeof(addr));
+    addr.sin6_family      = AF_INET6;
+    memcpy(&addr.sin6_addr, &in6addr_any, sizeof(in6addr_any));
+    addr.sin6_port        = htons(portNum);
+    bind(sock,
+              (struct sockaddr *)&addr, sizeof(addr));
+
+
     if ((rem = gethostbyname(serverIP)) == NULL) {
 	   herror("gethostbyname"); exit(1);
     }
@@ -881,6 +891,40 @@ Client::~Client() {
     char command_log_off[17] = {'\0'};
     strcpy(command_log_off,"LOG_OFF         ");
     send(sock,command_log_off,17,0);
+
+    long ip ;
+
+    char hostbuffer[256];
+	char *IPbuffer;
+	struct hostent *host_entry;
+	int hostname;
+
+    hostname = gethostname(hostbuffer, sizeof(hostbuffer));
+
+	// To retrieve host information
+	host_entry = gethostbyname(hostbuffer);
+    if (host_entry == NULL)
+	{
+		perror("gethostbyname");
+		exit(1);
+	}
+
+	// To convert an Internet network
+	// address into ASCII string
+	IPbuffer = inet_ntoa(*((struct in_addr*)
+						host_entry->h_addr_list[0]));
+    if (NULL == IPbuffer)
+	{
+		perror("inet_ntoa");
+		exit(1);
+	}
+
+
+    ip=inet_addr(IPbuffer);
+    short myport = htons(portNum);
+    write(sock,&ip,sizeof(long));
+    write(sock,&myport,sizeof(short));
+
     close(sock);
     for (int i = 0; i < workerThreads; i++) {
         pthread_kill(wthreads[i],SIGTERM);

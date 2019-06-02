@@ -414,15 +414,13 @@ void Server::run_server(void) {
                   first_connection(fds[i].fd);
               }
               else if (strcmp(cmd,"LOG_OFF         ") == 0) {
-                  struct sockaddr_in addr;
-                  socklen_t addr_size = sizeof(struct sockaddr_in);
-                  if(getpeername(fds[i].fd, (struct sockaddr *)&addr, &addr_size) <  0) {
-                      perror("getpeername");
-                  }
-                  char *clientip = new char[20];
-                  strcpy(clientip, inet_ntoa(addr.sin_addr));
-                  //list.addNode(addr);
-                  printf("Accepted connection from %ld:%d\n", addr.sin_addr.s_addr,addr.sin_port);
+                  long offip ;short offport ;
+                  recv(fds[i].fd,&offip,sizeof(long),0);
+                  recv(fds[i].fd,&offport,sizeof(short),0);
+                  offip = ntohl(offip);
+                  offport = ntohs(offport);
+                  printf("Received log off from <%ld,%d> \n",offip,offport );
+
                  // remove_user()
               }
             } while(TRUE);
