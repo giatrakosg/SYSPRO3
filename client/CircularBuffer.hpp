@@ -26,6 +26,11 @@ struct CBNode {
     char  *pathname ;
     char  *version   ;
     CBNode(long ,short ,char *,char *);
+    ~CBNode() {
+        printf("Deleting CBNode \n");
+        delete pathname ;
+        delete version ;
+    }
 };
 
 

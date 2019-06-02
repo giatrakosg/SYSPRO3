@@ -878,33 +878,18 @@ Client::~Client() {
     printf("Connecting to %s port %d\n", serverIP, serverPort);
     char command_log_off[17] = {'\0'};
     strcpy(command_log_off,"LOG_OFF         ");
-
     send(sock,command_log_off,17,0);
-    long ip ;
+    close(sock);
+    for (int i = 0; i < workerThreads; i++) {
+        pthread_kill(wthreads[i],SIGTERM);
+    }
+    delete wthreads ;
 
-    char hostbuffer[256];
-	char *IPbuffer;
-	struct hostent *host_entry;
-	int hostname;
+    delete buffer ;
+    printf("Deleting dirName \n");
+    delete dirName ;
+    printf("Deleting ServerIP\n");
+    delete serverIP ;
 
-    hostname = gethostname(hostbuffer, sizeof(hostbuffer));
-
-	// To retrieve host information
-	host_entry = gethostbyname(hostbuffer);
-    if (host_entry == NULL)
-	{
-		perror("gethostbyname");
-		exit(1);
-	}
-
-	// To convert an Internet network
-	// address into ASCII string
-	IPbuffer = inet_ntoa(*((struct in_addr*)
-						host_entry->h_addr_list[0]));
-    if (NULL == IPbuffer)
-	{
-		perror("inet_ntoa");
-		exit(1);
-	}
 
 }

@@ -57,7 +57,6 @@ struct worker_t_arguments {
 
 class Client {
 private:
-    char *strIP ; // This clients ip in string format
     long ip ; // This clients ip in long form
 
     ClientList list ;
