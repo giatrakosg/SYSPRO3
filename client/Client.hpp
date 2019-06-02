@@ -62,10 +62,10 @@ private:
 
     ClientList list ;
     CircularBuffer *buffer ;
-
     char *dirName ;
     short portNum ;
     int workerThreads ;
+    pthread_t *wthreads;
     int bufferSize ;
     short serverPort ;
     char *serverIP ;

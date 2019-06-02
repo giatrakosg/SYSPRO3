@@ -13,6 +13,18 @@
 
 #define perror2(s,e) fprintf(stderr, "%s: %s\n", s, strerror(e))
 
+Client *client ;
+
+void sig_handler(int signo)
+{
+  if (signo == SIGINT) {
+      delete client ;
+        exit(0);
+  }
+}
+
+
+
 void *main_thread(void *argp){ /* Thread function */
     Client *myclient = (Client *)argp ;
     myclient->printInfo();
@@ -84,12 +96,15 @@ int main(int argc, char **argv) {
     pthread_t thr;
     int err, status;
 
+    signal(SIGINT, sig_handler);
+
+
     char *dir ;
     short port ,server_port ;
     int wrk_ts , buff;
     char * sip ;
     getArgs(argc,argv,dir,port,wrk_ts,buff,server_port,sip);
-    Client *client = new Client(dir,port,wrk_ts,buff,server_port,sip) ;
+    client = new Client(dir,port,wrk_ts,buff,server_port,sip) ;
 
     if (err = pthread_create(&thr, NULL, main_thread, (void *)client)) { /* New thread */
         perror2("pthread_create", err);
