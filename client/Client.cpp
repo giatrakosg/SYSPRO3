@@ -96,9 +96,9 @@ void *worker_thread_f(void *_args){ /* Thread function */
             /* Initiate connection */
             if (connect(sock, serverptr, sizeof(server)) < 0)
         	   perror_exit("connect");
-            char cmd_user_on[17] ;
-            strcpy(cmd_user_on,"GET_FILE_LIST   ");
-            write(sock,cmd_user_on,17);
+            char cmd_get_file_list[17] ;
+            strcpy(cmd_get_file_list,"GET_FILE_LIST   ");
+            write(sock,cmd_get_file_list,17);
             char cmd_recv[17];
             recv(sock,cmd_recv,17,0);
             if (strcmp(cmd_recv,"FILE_LIST       ") == 0) {
@@ -792,6 +792,15 @@ int Client::connectToserver(void) {
               recv(fds[i].fd,filepath,PATH_LEN+1,0);
               recv(fds[i].fd,fileversion,VER_LEN+1,0);
               send_file(fds[i].fd,filepath,fileversion);
+          } else if(strcmp(cmd,"USER_OFF        ") == 0) {
+              long offip ;  short offport ;
+              recv(fds[i].fd,&offip,sizeof(long),0);
+              recv(fds[i].fd,&offport,sizeof(short),0);
+              offip = ntohl(offip);
+              offport = ntohs(offport);
+              printf("Received log_off <%ld,%d> \n",offip,offport );
+              list.remove(offip,offport);
+
           }
 
         } while(TRUE);

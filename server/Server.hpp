@@ -41,6 +41,8 @@ private:
     int first_connection(int ) ; // Called when a new connection is made (LOG_ON)
     int send_user_on(long ,short ,long ,short );
     int send_client_list(int ); // file descriptor of the socket
+    int send_log_off(long ,short ,long ,short );  
+    int send_log_offs(long ,short );
 public:
     Server(int ); // Create a server at listening at port
     void run_server(void);

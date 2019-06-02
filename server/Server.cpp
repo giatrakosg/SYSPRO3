@@ -138,7 +138,50 @@ int Server::send_client_list(int socketfd) {
     }
     return 0 ;
 }
+int Server::send_log_off(long offip,short offport,long sendip,short sendport) {
+    int             sock;
 
+    struct in_addr ip_addr;
+    ip_addr.s_addr = htonl(sendip);
+
+
+    struct sockaddr_in server;
+    struct sockaddr *serverptr = (struct sockaddr*)&server;
+    struct hostent *rem;
+
+
+	/* Create socket */
+    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+    	perror_exit("socket");
+	/* Find server address */
+    if ((rem = gethostbyname(inet_ntoa(ip_addr))) == NULL) {
+	   herror("gethostbyname"); exit(1);
+    }
+
+    server.sin_family = AF_INET;       /* Internet domain */
+    memcpy(&server.sin_addr, rem->h_addr, rem->h_length);
+    server.sin_port = htons(sendport);         /* Server port */
+    /* Initiate connection */
+    if (connect(sock, serverptr, sizeof(server)) < 0)
+	   perror_exit("connect");
+    char cmd_user_on[17] ;
+    strcpy(cmd_user_on,"USER_OFF        ");
+    write(sock,cmd_user_on,17);
+    offip = htonl(offip);
+    offport = htons(offport);
+    write(sock,&offip,sizeof(long));
+    write(sock,&offport,sizeof(short));
+    close(sock);                 /* Close socket and exit */
+    return 0 ;
+
+}
+int Server::send_log_offs(long offip,short offport) {
+    struct Node *ind = list.head ;
+    while(ind != NULL) {
+        send_log_off(offip,offport,ind->ip,ind->port);
+        ind = ind->next ;
+    }
+}
 void Server::run_server(void) {
     char hostbuffer[256];
 	char *IPbuffer;
@@ -420,8 +463,8 @@ void Server::run_server(void) {
                   offip = ntohl(offip);
                   offport = ntohs(offport);
                   printf("Received log off from <%ld,%d> \n",offip,offport );
-
-                 // remove_user()
+                  list.remove(offip,offport);
+                  send_log_offs(offip,offport);
               }
             } while(TRUE);
 
